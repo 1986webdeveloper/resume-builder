@@ -1,0 +1,21 @@
+# Dependency directories
+*/node_modules/
+
+# Build output
+*/build/
+*.js
+*.js.map
+*.d.ts
+
+# IDE files
+.vscode/
+.idea/
+
+# Compiled TypeScript
+*.tsbuildinfo
+
+# Environment variables
+*/.env
+
+# Logs
+*.log
