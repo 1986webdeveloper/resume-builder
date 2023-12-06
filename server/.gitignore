@@ -1,11 +1,11 @@
 # Dependency directories
-*/node_modules/
+server/node_modules/
 
 # Build output
-*/build/
-*.js
-*.js.map
-*.d.ts
+server/build/
+server/*.js
+server/*.js.map
+server/*.d.ts
 
 # IDE files
 .vscode/
@@ -15,7 +15,7 @@
 *.tsbuildinfo
 
 # Environment variables
-*/.env
+server/*.env
 
 # Logs
-*.log
+server/*.log
