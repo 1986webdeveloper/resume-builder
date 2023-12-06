@@ -48,6 +48,7 @@ export const userHelperService = new (class {
     };
     //send email to user
     await senderService.sendEmail(emailOptions);
+
     return {
       userId: user._id,
       email: user.email,
