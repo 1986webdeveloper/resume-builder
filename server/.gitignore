@@ -1,11 +1,11 @@
 # Dependency directories
-server/node_modules/
+/server/node_modules/
 
 # Build output
-server/build/
-server/*.js
-server/*.js.map
-server/*.d.ts
+/server/build/
+/server/*.js
+/server/*.js.map
+/server/*.d.ts
 
 # IDE files
 .vscode/
