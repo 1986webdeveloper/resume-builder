@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Input from "../../components/shared/Input";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { loginFields } from "../../config/fields";
@@ -8,6 +8,8 @@ import { fieldTypes } from "../../types/fieldTypes";
 import { useState } from "react";
 import { loginUser } from "../../services/auth/loginUser";
 import { toast } from "react-toastify";
+import { login } from "../../store/slices/authSlice";
+import { useDispatch } from "react-redux";
 
 export default function Login() {
   type Inputs = {
@@ -22,14 +24,20 @@ export default function Login() {
   } = useForm<Inputs>();
 
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     setIsLoading(true);
     loginUser(data)
       .then((res) => {
         if (res.status === 200) {
+          console.log(res);
           toast.success(res.data.message);
           setIsLoading(false);
+          dispatch(login());
+          localStorage.setItem("token", res.data?.data?.token);
+          navigate("/");
         }
       })
       .catch((err) => {
