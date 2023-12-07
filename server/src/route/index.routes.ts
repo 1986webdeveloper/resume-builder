@@ -8,6 +8,6 @@ export default (app: Application) => {
 
   app.use("/api/user/", userRoute);
 
-  app.use("api/admin/", adminRoutes)
+  app.use("/api/admin/", adminRoutes)
 };
 //routes
