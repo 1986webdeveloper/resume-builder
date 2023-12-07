@@ -1,7 +1,7 @@
 import express from "express";
 import { UserController } from "../controller/user.controller";
 import { asyncHandler } from "../common/error.service";
-import { verifyToken } from "../middwares/user.middleware";
+import { verifyToken } from "../middleware/user.middleware";
 const route = express.Router();
 
 route.post("/createUser", asyncHandler(UserController.registerUser));

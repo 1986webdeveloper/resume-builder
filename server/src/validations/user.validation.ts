@@ -1,4 +1,3 @@
-import { Transform } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsString, ValidateIf } from "class-validator";
 
 //create user validation

@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.email_verification_subject = exports.successPasswordSet = exports.successUserVerified = exports.successUserLogin = exports.successPleaseverifyEmail = exports.successUserCreated = exports.errorYourAccountBlockedTemp = exports.errorTomanyAttempsOfPassword = exports.errorPleaseChangeYourpassword = exports.errorUserNotVerified = exports.errorTokenExpire = exports.errorPleaseProvideAccessToken = exports.errorIncorrectPassword = exports.errorUserAlreadyExist = exports.errorEmailNotSent = exports.errorEmailNotFound = exports.errotTokenNotCreated = exports.errorUserNotFound = exports.errorUserNotCreated = void 0;
+const constant_1 = require("./constant");
+exports.errorUserNotCreated = "Sorry! user not created";
+exports.errorUserNotFound = "User not found!";
+exports.errotTokenNotCreated = "Token not created";
+exports.errorEmailNotFound = "Incorrect credential!";
+exports.errorEmailNotSent = "Email not sent";
+exports.errorUserAlreadyExist = "User already exits";
+exports.errorIncorrectPassword = "Incorrect password";
+exports.errorPleaseProvideAccessToken = "Please provide valid token";
+exports.errorTokenExpire = "Authentication link expire";
+exports.errorUserNotVerified = "Email not verified";
+exports.errorPleaseChangeYourpassword = 'Please change your password';
+exports.errorTomanyAttempsOfPassword = `Please try after ${constant_1.COOL_OFF_MIN} minutes`;
+exports.errorYourAccountBlockedTemp = 'Your account is blocked for temporary';
+//SUCCESS message
+exports.successUserCreated = "User registered successfully! please verify your email";
+exports.successPleaseverifyEmail = "Please verify your email";
+exports.successUserLogin = "User login successfully";
+exports.successUserVerified = "Email verified successfully";
+exports.successPasswordSet = "Password set successfully";
+exports.email_verification_subject = "Email verification";

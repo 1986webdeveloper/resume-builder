@@ -25,6 +25,7 @@ export const asyncHandler =
           .status(errorObj.statusCode)
           .json({ error: errorObj.message });
       } else {
+        console.log({ errorObj })
         // Handle other types of errors
         return res
           .status(HTTP_STATUS_CODE.internal_error)

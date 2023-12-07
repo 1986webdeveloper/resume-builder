@@ -11,6 +11,7 @@ export const HTTP_STATUS_CODE = {
 // database models
 export const ModelName = {
   userModel: "User",
+  designationModel: "Designation"
 };
 //#endregion
 
@@ -25,3 +26,16 @@ export const IS_DEV =
   process.env.NODE_ENV != "uat" && process.env.NODE_ENV != "prod";
 export const IS_UAT = process.env.NODE_ENV == "uat";
 export const IS_PROD = process.env.NODE_ENV == "prod";
+
+export const ACTIVE = true
+export const DEACTIVE = false
+
+export const PRE_DEFINE_DEGIGNATATION = ["frontend", "backend", "qa"]
+
+//summary type
+export const SUMMARY_EXP = 'EXPERIENCE'
+export const SUMMARY_ABT = 'ABOUT'
+export enum SummaryType {
+  ABOUT = SUMMARY_ABT,
+  EXPERIENCE = SUMMARY_EXP
+}

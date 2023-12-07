@@ -48,6 +48,8 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: false
   }
+}, {
+  timestamps: true,
 });
 
 //create new user model

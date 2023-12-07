@@ -1,4 +1,4 @@
-import { HTTP_STATUS_CODE, TOKEN_EXPIRE_MIN } from "../common/constant";
+import { HTTP_STATUS_CODE, IS_PROD, TOKEN_EXPIRE_MIN } from "../common/constant";
 import { CryptoService } from "../common/crypt.service";
 import { HttpError } from "../common/error.service";
 import { senderService } from "../common/sender.service";
@@ -47,11 +47,13 @@ export const userHelperService = new (class {
       html
     };
     //send email to user
-    await senderService.sendEmail(emailOptions);
+    if (IS_PROD) await senderService.sendEmail(emailOptions);
+
     return {
       userId: user._id,
       email: user.email,
       expire_min: TOKEN_EXPIRE_MIN + "m",
+      redirectRoute
     };
   }
   //#endregion

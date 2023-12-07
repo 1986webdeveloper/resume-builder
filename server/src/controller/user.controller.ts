@@ -32,7 +32,7 @@ export class UserController {
     userInput.last_name = input.last_name;
     userInput.email = input.email;
     //check validation
-    await checkValidation({ email: userInput.email });
+    await checkValidation(userInput);
     //check if user already exits
     await userService.checkUserExists({ email: userInput.email });
     const payload: CreateUser = {

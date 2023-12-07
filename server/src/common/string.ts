@@ -13,11 +13,16 @@ export const errorUserNotVerified = "Email not verified";
 export const errorPleaseChangeYourpassword = 'Please change your password'
 export const errorTomanyAttempsOfPassword = `Please try after ${COOL_OFF_MIN} minutes`
 export const errorYourAccountBlockedTemp = 'Your account is blocked for temporary'
+export const errorSummaryNotAdded = 'Summary not added'
+export const errorRecordNotCreated = 'Record not created!'
+export const errorDesignationIsNotValue = 'Designation is not valid'
+export const errorTypeIsInvalid = 'Invalid type!'
 //SUCCESS message
 export const successUserCreated = "User registered successfully! please verify your email";
 export const successPleaseverifyEmail = "Please verify your email";
 export const successUserLogin = "User login successfully";
 export const successUserVerified = "Email verified successfully";
 export const successPasswordSet = "Password set successfully";
-
 export const email_verification_subject = "Email verification";
+export const Success = 'Success'
+export const successDegignationCreated = 'Summary created'

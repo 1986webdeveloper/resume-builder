@@ -64,12 +64,13 @@ export async function userAuth(
       HTTP_STATUS_CODE.unauthorized,
     );
   const userId = is_verified?.userId;
-  const checkUser = await userService.checkUserExists({ token }, true);
+  const checkUser = await userService.checkUserExists({ _id: userId, token }, true);
   if (!checkUser)
     throw new HttpError(
       errorPleaseProvideAccessToken,
       HTTP_STATUS_CODE.unauthorized,
     );
+
   req.body.userId = userId;
   req.query.userId = userId;
   next();

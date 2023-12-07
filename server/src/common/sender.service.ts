@@ -29,7 +29,6 @@ export const senderService = new class {
         return success
       })
       .catch(error => {
-        // console.log({ error )
         throw new HttpError(error)
       });
 
