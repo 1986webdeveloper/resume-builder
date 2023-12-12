@@ -86,4 +86,41 @@ export const passwordFields: fieldTypes[] = [
   },
 ];
 
-// export { loginFields, signupFields };
+export const addDesignationForm: fieldTypes[] = [
+  {
+    labelText: "Designation",
+    labelFor: "designation",
+    id: "designation",
+    name: "designation",
+    type: "text",
+    autoComplete: "designation",
+    isRequired: true,
+    placeholder: "Designation",
+    pattern: /^[^\s]+(?:$|.*[^\s]+$)/,
+  },
+  {
+    labelText: "Summary",
+    labelFor: "summary",
+    id: "summary",
+    name: "summary",
+    type: "text",
+    autoComplete: "summary",
+    isRequired: true,
+    placeholder: "Summary",
+    pattern: /^[^\s]+(?:$|.*[^\s]+$)/,
+  },
+];
+
+export const addSummaryForm: fieldTypes[] = [
+  {
+    labelText: "Summary",
+    labelFor: "summary",
+    id: "summary",
+    name: "summary",
+    type: "text",
+    autoComplete: "summary",
+    isRequired: true,
+    placeholder: "Summary",
+    pattern: /^[^\s]+(?:$|.*[^\s]+$)/,
+  },
+];

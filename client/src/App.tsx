@@ -17,6 +17,7 @@ import ResumeBuilder from "./pages/resumeBuilder/Index";
 import CollectionLayout from "./components/layout/CollectionLayout";
 import AvailableFields from "./pages/masters/AvailableFields";
 import Designations from "./pages/masters/Designations";
+import Skills from "./pages/masters/Skills";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.auth.value);
@@ -28,6 +29,7 @@ function App() {
         <Route index element={<Masters />} />
         <Route path=":collection" element={<Designations />} />
         <Route path=":collection/:id" element={<AvailableFields />} />
+        <Route path="skills" element={<Skills />} />
       </Route>
       <Route path="resume" element={<ResumeBuilder />} />
     </Route>
