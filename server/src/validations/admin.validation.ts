@@ -57,4 +57,3 @@ export class EditDesignationAndSummary {
     @IsBoolean()
     active!: boolean
 }
-

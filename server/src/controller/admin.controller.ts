@@ -1,7 +1,14 @@
 
 import { Request, Response } from 'express'
-import { AddDesignationSummary, EditDesignationAndSummary } from '../validations/admin.validation'
-import { ACTIVE, DEACTIVE, HTTP_STATUS_CODE, PRE_DEFINE_DEGIGNATATION, SUMMARY_ABT, SUMMARY_EXP, SummaryType }
+import {
+    AddDesignationSummary,
+    EditDesignationAndSummary
+} from '../validations/admin.validation'
+import {
+    ACTIVE, DEACTIVE, HTTP_STATUS_CODE,
+    PRE_DEFINE_DEGIGNATATION,
+    SUMMARY_ABT, SUMMARY_EXP
+}
     from '../common/constant'
 import { Success, errorDesignationIsNotValue, errorTypeIsInvalid, successDegignationCreated } from '../common/string'
 import { HttpError, checkValidation } from '../common/error.service'
@@ -66,7 +73,7 @@ export class AdminController {
         await checkValidation(userInput);
         //check is delete or active task
         const is_enable = userInput.active == ACTIVE || userInput.active == DEACTIVE
-        const update_where: any = { _id: userInput.designationId, is_active: ACTIVE }
+        const update_where: any = { _id: userInput.designationId }
         const updateData: any = {}
         //check update summary or designation title
         if (userInput.summaryId) {
@@ -80,6 +87,7 @@ export class AdminController {
                 throw new HttpError(errorDesignationIsNotValue,
                     HTTP_STATUS_CODE.bad_request)
             if (is_enable) updateData.is_active = userInput.active
+
             else updateData.name = userInput.title
         }
         //update designation
@@ -144,4 +152,6 @@ export class AdminController {
 
     }
     //#endregion
+
+
 }

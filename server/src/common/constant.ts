@@ -11,7 +11,12 @@ export const HTTP_STATUS_CODE = {
 // database models
 export const ModelName = {
   userModel: "User",
-  designationModel: "Designation"
+  designationModel: "Designation",
+  skills: "Skills",
+  educations: "Educations",
+  counties: "Countries",
+  states: "States",
+  cities: "Cities"
 };
 //#endregion
 
@@ -30,7 +35,7 @@ export const IS_PROD = process.env.NODE_ENV == "prod";
 export const ACTIVE = true
 export const DEACTIVE = false
 
-export const PRE_DEFINE_DEGIGNATATION = ["frontend", "backend", "qa"]
+export const PRE_DEFINE_DEGIGNATATION = ["frontend", "backend", "qa", "devops", 'data analyst', "data engineer"]
 
 //summary type
 export const SUMMARY_EXP = 'EXPERIENCE'

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ACTIVE, SUMMARY_ABT } from "../common/constant";
 import { HttpError } from "../common/error.service";
 import { errorRecordNotCreated, errorSummaryNotAdded } from "../common/string";
@@ -40,24 +41,30 @@ export const adminService = new class {
 
     //#region  common summary
     async addSummaryToDesignation(designation_id: Object, payload: UpdateSummary) {
-        const updateData = { $push: { summaries: payload } }
+        const updateData = { $push: { summaries: payload }, is_active: ACTIVE }
         const checkUpdateSummary = await this.updateDesignation({ _id: designation_id }, updateData)
         if (!checkUpdateSummary) throw new HttpError(errorSummaryNotAdded)
     }
     //#endregion
 
     //#region designation summary list
-    async summaryList(designationId: Object, type: string | undefined = SUMMARY_ABT) {
-        const filter: any = {
-            _id: designationId,
-            is_active: ACTIVE,
-            "summaries.is_active": ACTIVE,
-            "summaries.type": type
-        }
-        //get designation
-        const deg_list = await this.getDesignationName(filter, ['summaries'])
-        if (!deg_list) return []
-        else return deg_list?.summaries ?? []
+    async summaryList(designationId: any, type: string | undefined = SUMMARY_ABT) {
+        const filter: any = [
+            { $match: { _id: new Types.ObjectId(designationId), is_active: ACTIVE, 'summaries.type': type } },
+            { $unwind: '$summaries' },
+            { $match: { 'summaries.type': type, 'summaries.is_active': ACTIVE } },
+            {
+                $project: {
+                    _id: '$summaries._id',
+                    summary: '$summaries.summary',
+                    is_active: '$summaries.is_active',
+                    userId: '$summaries.userId',
+                    type: '$summaries.type'
+                }
+            }
+        ]
+        const deg_list: any = await DesignationModel.aggregate(filter)
+        return deg_list ?? []
 
     }
     //#endregion
@@ -72,4 +79,7 @@ export const adminService = new class {
         return (list ?? [])
     }
     //#endregion
+
+
+
 }

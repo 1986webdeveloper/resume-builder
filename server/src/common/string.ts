@@ -15,8 +15,10 @@ export const errorTomanyAttempsOfPassword = `Please try after ${COOL_OFF_MIN} mi
 export const errorYourAccountBlockedTemp = 'Your account is blocked for temporary'
 export const errorSummaryNotAdded = 'Summary not added'
 export const errorRecordNotCreated = 'Record not created!'
+export const errorRecordNotUpdated = 'Record not updated'
 export const errorDesignationIsNotValue = 'Designation is not valid'
 export const errorTypeIsInvalid = 'Invalid type!'
+export const errorSkillsAlreadyExist = 'Skill already exits'
 //SUCCESS message
 export const successUserCreated = "User registered successfully! please verify your email";
 export const successPleaseverifyEmail = "Please verify your email";

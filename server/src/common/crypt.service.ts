@@ -27,7 +27,7 @@ export class CryptoService {
 
   //#region  verify token
   static async verifyJWTToken(token: string) {
-    return await jwt.verify(token, tokenSecret);
+    try { return await jwt.verify(token, tokenSecret); } catch (e) { return false }
   }
 
   //#region generate otp with expire time
