@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Card from "../../components/shared/Card";
 import { useParams } from "react-router-dom";
 import { getDesignations } from "../../services/masters/designation/getDesignations";
-import { MdAddCircle } from "react-icons/md";
 import AddModal from "../../components/sections/AddModal";
 import { addDesignation } from "../../services/masters/designation/addDesignation";
 import { toast } from "react-toastify";
@@ -11,6 +10,9 @@ import { getAllowedDesignations } from "../../services/masters/designation/getAl
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
+import Header from "../../components/shared/Header";
+import Breadcrumb from "../../components/shared/Breadcrumb";
+
 export default function Designations() {
   interface designationType {
     name: string;
@@ -26,7 +28,6 @@ export default function Designations() {
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
-
   const [isLoading, setIsLoading] = useState(false);
   const [availableDesignations, setAvailableDesignations] = useState<
     designationType[]
@@ -69,13 +70,16 @@ export default function Designations() {
     getAllowedDesignationsFirst();
   }, [collection]);
 
+  const handleOpenAddModal = () => {
+    setIsOpen(true);
+  };
+
   const handleModalClose = () => {
     console.log("close");
     setIsOpen(false);
   };
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data?.designation, textAreaData, "onSubmitForm");
     if (data?.designation && textAreaData) {
       addDesignation(
         token,
@@ -85,6 +89,7 @@ export default function Designations() {
         .then((res) => {
           if (res.status === 201) {
             getAvailableDesignations();
+            toast.success(res.data?.message);
             setIsOpen(false);
           }
         })
@@ -109,6 +114,7 @@ export default function Designations() {
         .then((res) => {
           if (res.status === 200) {
             getAvailableDesignations();
+            toast.error(res.data?.message);
             setIsOpenDeleteModal(false);
           }
         })
@@ -120,27 +126,12 @@ export default function Designations() {
 
   return (
     <>
-      <div className="max-w-full sm:text-center">
-        <div className="flex justify-between items-center">
-          <div className="self-center mx-auto">
-            <h2 className="md:text-5xl text-3xl font-semibold tracking-tight">
-              Choose Designation
-            </h2>
-            <div className="flex justify-center">
-              <p className=" mt-6 text-xl/8 font-medium text-gray-500 ">
-                Select the designation which you want to modify.
-              </p>
-            </div>
-          </div>
-          <button
-            className="mr-5 bg-primary px-5 py-3 text-center rounded-lg text-white flex gap-2 items-center"
-            onClick={() => setIsOpen(true)}
-          >
-            <MdAddCircle />
-            <span>Add</span>
-          </button>
-        </div>
-      </div>
+      <Header
+        handleOpenAddModal={handleOpenAddModal}
+        title="Choose Designation"
+        description="Select the designation which you want to modify."
+      />
+      <Breadcrumb />
       {isOpen && (
         <form
           className="mx-auto max-w-xs mt-3"
@@ -185,7 +176,6 @@ export default function Designations() {
         <Modal
           handleDeleteModalClose={handleDeleteModalClose}
           handleDelete={handleDelete}
-          // handleEdit={handleEdit}
         />
       )}
 

@@ -1,4 +1,3 @@
-import { MdAddCircle } from "react-icons/md";
 import SummaryCard from "../../components/shared/SummaryCard";
 import { useEffect, useState } from "react";
 import { getSkills } from "../../services/masters/skills/getSkills";
@@ -10,6 +9,8 @@ import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
 import { updateSkill } from "../../services/masters/skills/updateSkill";
 import { deleteSkill } from "../../services/masters/skills/deleteSkill";
+import Header from "../../components/shared/Header";
+import Breadcrumb from "../../components/shared/Breadcrumb";
 
 interface skillTypes {
   name: string;
@@ -50,6 +51,10 @@ export default function Skills() {
     getAllSkills();
   }, []);
 
+  const handleOpenAddModal = () => {
+    setIsOpen(true);
+  };
+
   const handleOpenDeleteModal = (id: string) => {
     setOpenedID(id);
     setIsOpenDeleteModal(true);
@@ -77,23 +82,34 @@ export default function Skills() {
       .then((res) => {
         if (res.status === 201) {
           getAllSkills();
+          toast.success(res.data?.message);
           setIsOpen(false);
           reset();
         }
       })
       .catch((err) => {
-        toast.error(err.response?.data?.data?.error);
+        toast.error(err.response?.data?.error);
       });
   };
 
-  const onEditSubmit = () => {
+  const onEditSubmit = (data: any) => {
     console.log(activeSkill);
     updateSkill(token, {
       skillId: activeSkill.id,
-      name: activeSkill.skill,
-    }).then((res) => {
-      console.log(res);
-    });
+      name: data.skill,
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          getAllSkills();
+          toast.success(res.data?.message);
+          setIsOpenEditModal(false);
+          reset();
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(err.response?.data?.error);
+      });
   };
 
   const handleDelete = () => {
@@ -102,38 +118,24 @@ export default function Skills() {
       deleteSkill(token, { skillId: openedId })
         .then((res) => {
           if (res.status === 200) {
+            toast.error(res.data?.message);
             setIsOpenDeleteModal(false);
             getAllSkills();
           }
         })
         .catch((err) => {
-          toast.error(err.response?.data?.data?.error);
+          toast.error(err.response?.data?.error);
         });
     }
   };
   return (
     <>
-      <div className="max-w-full sm:text-center">
-        <div className="flex justify-between items-center">
-          <div className="self-center mx-auto">
-            <h2 className="md:text-5xl text-3xl font-semibold tracking-tight">
-              Available Skills
-            </h2>
-            <div className="flex justify-center">
-              <p className=" mt-6 text-xl/8 font-medium text-gray-500 ">
-                Add or Edit available Skills
-              </p>
-            </div>
-          </div>
-          <button
-            className="mr-5 bg-primary px-5 py-3 text-center rounded-lg text-white flex gap-2 items-center"
-            onClick={() => setIsOpen(true)}
-          >
-            <MdAddCircle />
-            <span>Add</span>
-          </button>
-        </div>
-      </div>
+      <Header
+        handleOpenAddModal={handleOpenAddModal}
+        title="Available Skills"
+        description="Add or Edit available Skills"
+      />
+      <Breadcrumb />
       <div className="grid lg:grid-cols-5 md:grid-cols-4 grikd-cols-3 gap-6 mt-16">
         {allSkills.map((skill: skillTypes, index: number) => (
           <SummaryCard

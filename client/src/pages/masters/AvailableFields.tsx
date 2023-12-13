@@ -10,6 +10,8 @@ import RichTextEditor from "../../components/shared/RichTextEditor";
 import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
 import { updateSingleField } from "../../services/masters/summary/updateSingleField";
+import Header from "../../components/shared/Header";
+import Breadcrumb from "../../components/shared/Breadcrumb";
 
 export default function AvailableFields() {
   const { id, collection } = useParams();
@@ -56,6 +58,7 @@ export default function AvailableFields() {
         .then((res) => {
           if (res.status === 201) {
             getSummaries();
+            toast.success(res.data?.message);
             setIsOpen(false);
           }
         })
@@ -77,6 +80,10 @@ export default function AvailableFields() {
     getSummaries();
   }, [id, collection]);
 
+  const handleOpenAddModal = () => {
+    setIsOpen(true);
+  };
+
   const handleDeleteModalClose = () => {
     setIsOpenDeleteModal(false);
   };
@@ -96,11 +103,12 @@ export default function AvailableFields() {
         .then((res) => {
           if (res.status === 200) {
             getSummaries();
+            toast.error(res.data?.message);
             setIsOpenDeleteModal(false);
           }
         })
         .catch((err) => {
-          toast.error(err.response?.data?.data?.error);
+          toast.error(err.response?.data?.error);
         });
     }
   };
@@ -126,37 +134,23 @@ export default function AvailableFields() {
       .then((res) => {
         if (res.status === 200) {
           getSummaries();
+          toast.success(res.data?.message);
           setIsOpenEditModal(false);
         }
       })
       .catch((err) => {
-        toast.error(err.response?.data?.data?.error);
+        toast.error(err.response?.data?.error);
       });
   };
 
   return (
     <>
-      <div className="max-w-full sm:text-center">
-        <div className="flex justify-between items-center">
-          <div className="self-center mx-auto">
-            <h2 className="md:text-5xl text-3xl font-semibold tracking-tight">
-              All Summaries
-            </h2>
-            <div className="flex justify-center">
-              <p className=" mt-6 text-xl/8 font-medium text-gray-500 ">
-                Add or Edit available summaries
-              </p>
-            </div>
-          </div>
-          <button
-            className="mr-5 bg-primary px-5 py-3 text-center rounded-lg text-white flex gap-2 items-center"
-            onClick={() => setIsOpen(true)}
-          >
-            <MdAddCircle />
-            <span>Add</span>
-          </button>
-        </div>
-      </div>
+      <Header
+        handleOpenAddModal={handleOpenAddModal}
+        title="All Summaries"
+        description="Add or Edit available summaries."
+      />
+      <Breadcrumb />
 
       {isOpen && (
         <form className="mx-auto max-w-xs mt-3" onSubmit={(e) => onSubmit(e)}>

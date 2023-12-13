@@ -21,11 +21,6 @@ export default function Card({
   id,
   handleOpenDeleteModal,
 }: ComponentTypes) {
-  // const handleEdit = () => {
-  //   console.log("Edit Designation");
-  //   onEdit(id);
-  // };
-
   return (
     <div>
       <div className="p-7 rounded-xl border shadow-gray-200 shadow-xl bg-white ">

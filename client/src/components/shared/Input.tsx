@@ -36,6 +36,7 @@ export default function Input({
       })}
       id={id}
       type={type}
+      step="any"
       className={fixedInputClass + customClass}
       placeholder={placeholder}
     />
