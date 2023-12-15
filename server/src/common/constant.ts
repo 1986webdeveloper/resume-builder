@@ -10,13 +10,15 @@ export const HTTP_STATUS_CODE = {
 
 // database models
 export const ModelName = {
-  userModel: "User",
-  designationModel: "Designation",
-  skills: "Skills",
-  educations: "Educations",
-  counties: "Countries",
-  states: "States",
-  cities: "Cities"
+  userModel: "users",
+  designationModel: "designations",
+  skills: "skills",
+  educations: "educations",
+  counties: "countries",
+  states: "states",
+  cities: "cities",
+  userResume: "userresumes",
+  dataTypes: "datatypes"
 };
 //#endregion
 
@@ -33,7 +35,7 @@ export const IS_UAT = process.env.NODE_ENV == "uat";
 export const IS_PROD = process.env.NODE_ENV == "prod";
 
 export const ACTIVE = true
-export const DEACTIVE = false
+export const DE_ACTIVE = false
 
 export const PRE_DEFINE_DEGIGNATATION = ["frontend", "backend", "qa", "devops", 'data analyst', "data engineer"]
 
@@ -43,4 +45,25 @@ export const SUMMARY_ABT = 'ABOUT'
 export enum SummaryType {
   ABOUT = SUMMARY_ABT,
   EXPERIENCE = SUMMARY_EXP
+}
+
+export const RESUME_STEP = {
+  personal: "PERSONAL",
+  designation: "DESIGNATION",
+  experience: "EXPERIENCE",
+  education: "EDUCATION",
+  skill: "SKILL",
+  preview: "PREVIEW"
+
+}
+//pre define allowed value
+export const PRE_DEFINED_ALLOWED_VALUES = {
+  allowedOnly: DE_ACTIVE,
+  is_range: DE_ACTIVE,
+  boolean: DE_ACTIVE,
+  formate: DE_ACTIVE,
+  is_date: DE_ACTIVE,
+  is_number: DE_ACTIVE,
+  is_string: DE_ACTIVE,
+  is_array: DE_ACTIVE
 }

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { ACTIVE, ModelName, SummaryType } from "../common/constant";
 
 // user degignation define here
@@ -17,8 +17,9 @@ const designationSchema = new mongoose.Schema({
             default: ACTIVE
         },
         userId: {
-            type: Object,
-            required: true
+            type: Types.ObjectId,
+            required: true,
+            ref: ModelName.userModel,
         },
         type: {
             type: String,
@@ -30,8 +31,9 @@ const designationSchema = new mongoose.Schema({
         default: ACTIVE
     },
     userId: {
-        type: Object,
-        required: true
+        type: Types.ObjectId,
+        required: true,
+        ref: ModelName.userModel,
     },
 
 }, {

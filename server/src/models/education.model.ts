@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { ACTIVE, ModelName } from "../common/constant";
 
 // user education define here
@@ -22,8 +22,9 @@ const educationSchema = new mongoose.Schema({
             default: ACTIVE
         },
         userId: {
-            type: Object,
-            required: true
+            type: Types.ObjectId,
+            required: true,
+            ref: ModelName.userModel,
         },
     }],
     summaries: [{
@@ -35,8 +36,9 @@ const educationSchema = new mongoose.Schema({
             default: ACTIVE
         },
         userId: {
-            type: Object,
-            required: true
+            type: Types.ObjectId,
+            required: true,
+            ref: ModelName.userModel,
         },
 
     }],
@@ -45,8 +47,9 @@ const educationSchema = new mongoose.Schema({
         default: ACTIVE
     },
     userId: {
-        type: Object,
-        required: true
+        type: Types.ObjectId,
+        required: true,
+        ref: ModelName.userModel,
     },
 
 }, {

@@ -5,6 +5,7 @@ import { skillsRoute } from "./skills.route";
 import { educationRoute } from "./education.route";
 import { migrationRoute } from "./migration.route";
 import { helperRoute } from "./helper.route";
+import { resumeRouter } from "./resume.route";
 
 //export main api route
 export default (app: Application) => {
@@ -21,5 +22,7 @@ export default (app: Application) => {
   app.use('/api/migration/', migrationRoute)
 
   app.use('/api/helper/', helperRoute)
+
+  app.use('/api/resume/', resumeRouter)
 };
 //routes

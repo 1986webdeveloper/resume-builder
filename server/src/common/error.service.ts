@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { HTTP_STATUS_CODE } from "./constant";
-import { validate } from "class-validator";
+import { validate } from 'class-validator';
 //#region custom error handler
 
 export class HttpError extends Error {
@@ -47,3 +47,15 @@ export const checkValidation = async (userInput: any) => {
   }
 };
 //#endregion
+
+//#region get class properties
+export const getClassProperties = (obj: any): Record<string, any> => {
+  const propertyNames = Object.keys(obj);
+  const properties: Record<string, any> = {};
+
+  for (const propertyName of propertyNames) {
+    properties[propertyName] = obj[propertyName];
+  }
+
+  return properties;
+}

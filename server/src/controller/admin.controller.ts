@@ -5,7 +5,7 @@ import {
     EditDesignationAndSummary
 } from '../validations/admin.validation'
 import {
-    ACTIVE, DEACTIVE, HTTP_STATUS_CODE,
+    ACTIVE, DE_ACTIVE, HTTP_STATUS_CODE,
     PRE_DEFINE_DEGIGNATATION,
     SUMMARY_ABT, SUMMARY_EXP
 }
@@ -72,7 +72,7 @@ export class AdminController {
         //check validation
         await checkValidation(userInput);
         //check is delete or active task
-        const is_enable = userInput.active == ACTIVE || userInput.active == DEACTIVE
+        const is_enable = userInput.active == ACTIVE || userInput.active == DE_ACTIVE
         const update_where: any = { _id: userInput.designationId }
         const updateData: any = {}
         //check update summary or designation title

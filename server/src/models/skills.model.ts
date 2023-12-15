@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { ACTIVE, ModelName } from "../common/constant";
 
 // user skills define here
@@ -13,8 +13,10 @@ const skillsSchema = new mongoose.Schema({
         default: ACTIVE
     },
     userId: {
-        type: Object,
-        required: true
+        type: Types.ObjectId,
+        required: true,
+        ref: ModelName.userModel,
+
     },
 
 }, {

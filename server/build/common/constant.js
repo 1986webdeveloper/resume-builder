@@ -24,3 +24,5 @@ exports.COOL_OFF_MIN = 15;
 exports.IS_DEV = process.env.NODE_ENV != "uat" && process.env.NODE_ENV != "prod";
 exports.IS_UAT = process.env.NODE_ENV == "uat";
 exports.IS_PROD = process.env.NODE_ENV == "prod";
+
+export const DATA_TYPE = ['string', 'boolean', 'date', 'date with timestamp', 'number']

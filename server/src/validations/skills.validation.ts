@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty, IsString, ValidateIf } from "class-validator"
 import { Types } from "mongoose"
-import { ACTIVE, DEACTIVE } from "../common/constant"
+import { ACTIVE, DE_ACTIVE } from "../common/constant"
 
 export class AddSkills {
     @IsNotEmpty()
@@ -19,7 +19,7 @@ export class EditOrDeleteSkills {
     skillId!: Types.ObjectId
 
 
-    @ValidateIf((obj) => obj.active != ACTIVE && obj.active != DEACTIVE)
+    @ValidateIf((obj) => obj.active != ACTIVE && obj.active != DE_ACTIVE)
     @IsNotEmpty()
     @IsString()
     name!: string

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsObject, ValidateIf, IsOptional, IsString, ValidateNested, IsBoolean } from "class-validator";
 import { Types } from "mongoose";
-import { ACTIVE, DEACTIVE } from "../common/constant";
+import { ACTIVE, DE_ACTIVE } from "../common/constant";
 class Performance {
     @IsNotEmpty()
     label!: string
@@ -17,6 +17,7 @@ export class AddEducation {
     @IsNotEmpty()
     summary!: string
 
+    @IsOptional()
     @IsObject()
     @ValidateNested()
     performance!: Performance
@@ -31,7 +32,7 @@ export class EditOrDeleteEducation {
     @ValidateIf((obj) =>
         !obj.summaryId
         && !obj.performanceId &&
-        ![ACTIVE, DEACTIVE].includes(obj.active))
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
     @IsNotEmpty()
     degreeType!: string
 
@@ -40,7 +41,7 @@ export class EditOrDeleteEducation {
 
     @ValidateIf((obj) =>
         obj.summaryId &&
-        ![ACTIVE, DEACTIVE].includes(obj.active))
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
     @IsNotEmpty()
     summary!: string
 
@@ -49,7 +50,7 @@ export class EditOrDeleteEducation {
 
     @ValidateIf((obj) =>
         obj.performanceId &&
-        ![ACTIVE, DEACTIVE].includes(obj.active))
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
     @IsNotEmpty()
     @IsObject()
     @ValidateNested()

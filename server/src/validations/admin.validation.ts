@@ -3,7 +3,7 @@ import {
 
 } from 'class-validator'
 import { Transform } from 'class-transformer'
-import { ACTIVE, DEACTIVE, PRE_DEFINE_DEGIGNATATION, SUMMARY_ABT, SUMMARY_EXP } from '../common/constant'
+import { ACTIVE, DE_ACTIVE, PRE_DEFINE_DEGIGNATATION, SUMMARY_ABT, SUMMARY_EXP } from '../common/constant'
 import { Types } from 'mongoose'
 
 
@@ -44,7 +44,7 @@ export class EditDesignationAndSummary {
     @IsOptional()
     @IsString()
     summaryId!: string
-    @ValidateIf((obj) => obj.active != ACTIVE && obj.active != DEACTIVE)
+    @ValidateIf((obj) => obj.active != ACTIVE && obj.active != DE_ACTIVE)
     @IsNotEmpty()
     @IsString()
     title!: string

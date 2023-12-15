@@ -3,7 +3,7 @@ import { AddSkills, EditOrDeleteSkills } from '../validations/skills.validation'
 import { skillsService } from '../service/skills.service'
 import { HttpError, checkValidation } from '../common/error.service'
 import { Success, errorRecordNotUpdated, errorSkillsAlreadyExist } from '../common/string'
-import { ACTIVE, DEACTIVE, HTTP_STATUS_CODE } from '../common/constant'
+import { ACTIVE, DE_ACTIVE, HTTP_STATUS_CODE } from '../common/constant'
 export class SkillsController {
 
     //#region  add skills
@@ -48,7 +48,7 @@ export class SkillsController {
                 throw new HttpError(errorSkillsAlreadyExist,
                     HTTP_STATUS_CODE.bad_request)
         }
-        else if (userInput.active == ACTIVE || userInput.active == DEACTIVE)
+        else if (userInput.active == ACTIVE || userInput.active == DE_ACTIVE)
             updateData.is_active = userInput.active
         const update_where = { _id: userInput.skillId }
         const is_update = await skillsService.updateSkill(update_where, updateData)

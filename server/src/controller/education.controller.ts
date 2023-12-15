@@ -3,7 +3,7 @@ import { AddEducation, EditOrDeleteEducation } from "../validations/education.va
 import { HttpError, checkValidation } from "../common/error.service";
 import { educationService } from "../service/education.service";
 import { Success, errorRecordNotUpdated } from "../common/string";
-import { ACTIVE, DEACTIVE } from "../common/constant";
+import { ACTIVE, DE_ACTIVE, } from "../common/constant";
 
 export class EducationController {
     constructor() { }
@@ -14,7 +14,7 @@ export class EducationController {
         const input: AddEducation = req.body
         const userInput = new AddEducation()
         userInput.degreeType = input?.degreeType?.toLowerCase()
-        userInput.performance = input.performance
+        userInput.performance = input?.performance
         userInput.summary = input.summary
         userInput.userId = input.userId
         //check validation
@@ -26,23 +26,27 @@ export class EducationController {
         const checkExist = await educationService.getEducation(checkOptions)
         const userId = input.userId
         const updateRecord: any = {}
-        const performance = { ...userInput.performance, userId }
+
+        const performance: any = userInput?.performance
         const summary = { summary: userInput.summary, userId }
         //check existing data
         if (checkExist) {
             //performance
             const checkExistingPerformance = checkExist?.performances ?? []
             //check existing performance
-            let is_found = checkExistingPerformance.find(each =>
-                each.label == userInput.performance.label
-                && each.value == userInput.performance.value)
+            if (performance) {
+                let is_found = checkExistingPerformance.find(each =>
+                    each.label == performance?.label
+                    && each.value == performance?.value)
 
-            if (!is_found) updateRecord['$push'] = { performances: performance }
+                if (!is_found) updateRecord['$push'] = { performances: { ...(performance ?? {}), userId } }
+            }
             if (userInput?.summary) updateRecord['$push'] = { summaries: summary }
             const update_options = { _id: checkExist._id }
             await educationService.updateEducation(update_options, updateRecord)
         } else {
             updateRecord.degreeType = userInput.degreeType
+            performance.userId = userId
             updateRecord.performances = [performance]
             updateRecord.summaries = [summary]
             updateRecord.userId = userId
@@ -67,7 +71,7 @@ export class EducationController {
         userInput.performance = input.performance
         userInput.active = input.active
         userInput.userId = input.userId
-        const is_enable = userInput.active == ACTIVE || userInput.active == DEACTIVE
+        const is_enable = userInput.active == ACTIVE || userInput.active == DE_ACTIVE
 
         //check validation
         await checkValidation(userInput)
@@ -108,14 +112,13 @@ export class EducationController {
         const input = req.query
         const educationId = input.educationId
         const filter: any = { is_active: ACTIVE }
-        const attributes = ['_id', 'summaries', 'performances', 'is_active']
+        const attributes = ['_id', 'summaries', 'performances', 'degreeType', 'is_active']
         let list: any = []
         if (educationId) {
             filter._id = educationId
             list = await educationService.getEducation(filter, attributes)
         } else
-            list = await educationService.getAllEducation(filter,
-                ['_id', 'degreeType', 'is_active'])
+            list = await educationService.getAllEducation(filter, attributes)
         //response data
         const responseData = {
             message: Success,
