@@ -109,11 +109,8 @@ export default function Education() {
       <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
         {educations.map((item, index) => (
           <EducationCard
-            id={item}
+            id={item._id}
             title={item.degreeType}
-            summary={item.summaries}
-            score={item.performances}
-            handleEditModalOpen={handleEditModalOpen}
             handleOpenDeleteModal={handleOpenDeleteModal}
           />
         ))}

@@ -14,6 +14,7 @@ import AvailableFields from "./pages/masters/AvailableFields";
 import Designations from "./pages/masters/Designations";
 import Skills from "./pages/masters/Skills";
 import Education from "./pages/masters/Education";
+import EducationFields from "./pages/masters/EducationFields";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.auth.value);
@@ -34,6 +35,7 @@ function App() {
                 { path: ":collection/:id", element: <AvailableFields /> },
                 { path: "skills", element: <Skills /> },
                 { path: "education", element: <Education /> },
+                { path: "education/:degree", element: <EducationFields /> },
               ],
             },
             { path: "resume", element: <ResumeBuilder /> },

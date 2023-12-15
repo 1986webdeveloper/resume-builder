@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { MdAddCircle } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
 import { getDesignationsWiseSummaries } from "../../services/masters/summary/getDesignationsWiseSummaries";
