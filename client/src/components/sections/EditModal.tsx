@@ -1,16 +1,17 @@
-import { RiDeleteBin6Fill } from "react-icons/ri";
 import PropTypes, { InferProps } from "prop-types";
 
 const ComponentPropTypes = {
-  handleDeleteModalClose: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleModalClose: PropTypes.func.isRequired,
+  modalTitle: PropTypes.string,
+  children: PropTypes.any,
 };
 
 type ComponentTypes = InferProps<typeof ComponentPropTypes>;
 
-export default function Modal({
-  handleDeleteModalClose,
-  handleDelete,
+export default function EditModal({
+  handleModalClose,
+  modalTitle,
+  children,
 }: ComponentTypes) {
   return (
     <div
@@ -23,28 +24,21 @@ export default function Modal({
         <div className="">
           {/* <!--body--> */}
           <div className="text-center p-5 flex flex-col items-center justify-center">
-            <RiDeleteBin6Fill size={40} color={"#FA4C4C"} />
-            <h2 className="text-xl font-bold py-4 ">Are you sure?</h2>
-            <p className="text-sm text-gray-500 px-8">
-              Do you really want to delete this collection ? This process cannot
-              be undone
-            </p>
+            <h2 className="text-xl font-bold py-4 ">{modalTitle}</h2>
+            <form>{children}</form>
           </div>
-          {/* <!--footer--> */}
-          <div className="p-3  mt-2 text-center space-x-4 md:block">
+          <div className="p-3 mt-2 text-center space-x-4 md:block">
             <button
               className="mb-2 md:mb-0 bg-white px-5 py-2 text-sm shadow-sm font-medium tracking-wider border text-gray-600 rounded-full hover:shadow-lg hover:bg-gray-100"
-              onClick={() => handleDeleteModalClose()}
+              onClick={() => handleModalClose()}
             >
               Cancel
             </button>
             <button
-              className="mb-2 md:mb-0 bg-red-500 border border-red-500 px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-red-600"
-              onClick={() => {
-                handleDelete();
-              }}
+              className="mb-2 md:mb-0 bg-primary border px-5 py-2 text-sm shadow-sm font-medium tracking-wider text-white rounded-full hover:shadow-lg hover:bg-hover-primary"
+              type="submit"
             >
-              Delete
+              edit
             </button>
           </div>
         </div>
