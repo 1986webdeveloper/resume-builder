@@ -15,6 +15,8 @@ import Designations from "./pages/masters/Designations";
 import Skills from "./pages/masters/Skills";
 import Education from "./pages/masters/Education";
 import EducationFields from "./pages/masters/EducationFields";
+import ResumeBuilderLayout from "./components/layout/ResumeBuilderLayout";
+import DynamicStep from "./pages/resumeBuilder/DynamicStep";
 
 function App() {
   const isLoggedIn = useSelector((state: RootState) => state.auth.value);
@@ -38,7 +40,14 @@ function App() {
                 { path: "education/:degree", element: <EducationFields /> },
               ],
             },
-            { path: "resume", element: <ResumeBuilder /> },
+            {
+              path: "resume",
+              element: <ResumeBuilderLayout />,
+              children: [
+                { index: true, element: <ResumeBuilder /> },
+                { path: ":step", element: <DynamicStep /> },
+              ],
+            },
           ],
         },
       ]

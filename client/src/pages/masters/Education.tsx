@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
 import Breadcrumb from "../../components/shared/Breadcrumb";
 import EducationCard from "../../components/shared/EducationCard";
-import { getAllEducation } from "../../services/masters/education/getAllEducation";
 import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
-import { addEducation } from "../../services/masters/education/addEducation";
 import { toast } from "react-toastify";
+import { httpService } from "../../services/https";
+import Modal from "../../components/sections/DeleteModal";
 
 interface educationTypes {
-  id: string;
+  _id: string;
   degreeType: string;
   summary: string;
   score: string;
@@ -20,13 +20,12 @@ interface educationTypes {
 
 export default function Education() {
   const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
+  const [openedId, setOpenedId] = useState("");
   const [educations, setEducations] = useState([]);
-  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [openedId, setOpenedID] = useState("");
   const [textAreaData, setTextAreaData] = useState("");
   const [activeEducation, setActiveEducation] = useState<educationTypes>({
-    id: "",
+    _id: "",
     summary: "",
     degreeType: "",
     score: "",
@@ -48,21 +47,10 @@ export default function Education() {
     setValue,
   } = useForm<Inputs>();
 
-  const handleOpenAddModal = () => {
-    setIsOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsOpen(false);
-  };
-
-  const token = localStorage.getItem("token") || "";
-
   const getEducations = () => {
-    getAllEducation(token).then((res) => {
-      if (res.status === 200) {
+    httpService.get(`education/getAllEducationDetails`).then((res: any) => {
+      if (res.statusText === "OK") {
         setEducations(res.data?.data);
-        console.log(res);
       }
     });
   };
@@ -71,23 +59,26 @@ export default function Education() {
     getEducations();
   }, []);
 
-  const handleOpenDeleteModal = () => {
-    console.log("open");
+  const openModal = (id: string, type: string = "add") => {
+    setModalType(type);
+    setOpenedId(id);
+    setIsOpen(true);
   };
 
-  const handleEditModalOpen = () => {
-    console.log("open");
+  const closeModal = () => {
+    setIsOpen(false);
   };
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onAdd: SubmitHandler<Inputs> = (data) => {
     console.log(data, textAreaData);
-    addEducation(token, {
+    const body = {
       degreeType: data.degree,
       summary: textAreaData,
       performance: { label: data.scoreLabel, value: data.score },
-    })
-      .then((res) => {
-        console.log(res);
+    };
+    httpService
+      .post(`education/addEducation`, body)
+      .then((res: any) => {
         if (res.status === 200) {
           toast.success(res.data.message);
           getEducations();
@@ -98,33 +89,46 @@ export default function Education() {
         toast.error(err.response.data?.error);
       });
   };
+
+  const onDelete = () => {
+    httpService
+      .post(`education/editOrDeleteEducation`, {
+        educationId: openedId,
+        active: false,
+      })
+      .then((res: any) => {
+        if (res.status === 200) {
+          toast.success(res.data?.message);
+          getEducations();
+          setIsOpen(false);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response);
+      });
+  };
   return (
     <>
       <Header
-        handleOpenAddModal={handleOpenAddModal}
+        handleOpenAddModal={openModal}
         title="Available Education"
         description="Add or Edit available Education"
       />
       <Breadcrumb />
       <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
-        {educations.map((item, index) => (
+        {educations.map((item: educationTypes, index) => (
           <EducationCard
+            key={index}
             id={item._id}
-            title={item.degreeType}
-            handleOpenDeleteModal={handleOpenDeleteModal}
+            title={item?.degreeType}
+            handleOpenDeleteModal={openModal}
           />
         ))}
       </div>
 
-      {isOpen && (
-        <form
-          className="mx-auto max-w-xs mt-3"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <AddModal
-            handleModalClose={handleModalClose}
-            modalTitle="Add Education"
-          >
+      {isOpen && modalType === "add" && (
+        <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
+          <AddModal handleModalClose={closeModal} modalTitle="Add Education">
             <div>
               <div className="max-w-md">
                 <Input
@@ -181,14 +185,15 @@ export default function Education() {
                 </div>
               </div>
               <div className="max-w-md">
-                <RichTextEditor
-                  setTextAreaData={setTextAreaData}
-                  // defaultData={activeEducation.summary}
-                />
+                <RichTextEditor setTextAreaData={setTextAreaData} />
               </div>
             </div>
           </AddModal>
         </form>
+      )}
+
+      {isOpen && modalType === "delete" && (
+        <Modal handleDeleteModalClose={closeModal} handleDelete={onDelete} />
       )}
     </>
   );

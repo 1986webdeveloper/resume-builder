@@ -10,7 +10,6 @@ export default function Masters() {
     { name: "Experience", route: "experience" },
     { name: "Education", route: "education" },
     { name: "Skills", route: "skills" },
-    { name: "Custom", route: "custom" },
   ];
   const [isOpen, setIsOpen] = useState(false);
   const handleModalClose = () => {
@@ -20,7 +19,6 @@ export default function Masters() {
 
   const handleDelete = () => {
     console.log("record delete");
-    // setIsOpen(false);
   };
 
   const handleOpenAddModal = () => {
