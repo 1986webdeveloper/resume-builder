@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
 import Breadcrumb from "../../components/shared/Breadcrumb";
 import SummaryCard from "../../components/shared/SummaryCard";
-import { getIndividualSummaries } from "../../services/masters/education/getIndividualSummaries";
 import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
-import Http from "../../services/http";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import { httpService } from "../../services/https";
 
 interface summaryTypes {
   summary: string;
@@ -25,15 +24,13 @@ export default function EducationFields() {
   const [allSummaries, setAllSummaries] = useState([]);
   const [textAreaData, setTextAreaData] = useState("");
   const [activeSummary, setActiveSummary] = useState({ id: "", summary: "" });
-  const token = localStorage.getItem("token") || "";
 
   const getSummaries = () => {
-    getIndividualSummaries(token, id as string).then((res) => {
-      if (res.status === 200) {
-        console.log(res);
-        setAllSummaries(res.data?.data?.summaries);
-      }
-    });
+    httpService
+      .get(`education/getAllEducationDetails?educationId=${id}`)
+      .then((res: any) => {
+        setAllSummaries(res.data?.data[0]?.summaries);
+      });
   };
   useEffect(() => {
     getSummaries();
@@ -59,17 +56,18 @@ export default function EducationFields() {
       degreeType: degree,
       summary: textAreaData,
     };
-    Http.post("education/addEducation", body, false)
+    httpService
+      .post("education/addEducation", body)
       .then((res: any) => {
-        if (res.status === 200) {
-          toast.success(res.data?.data?.message);
+        if (res.statusText === "OK") {
+          toast.success(res.data?.message);
           getSummaries();
           setIsOpen(false);
         }
-        console.log(res);
       })
       .catch((err) => {
-        toast.error(err.response?.data?.error);
+        console.log(err, "error");
+        toast.error(err.response);
       });
   };
 
@@ -80,23 +78,39 @@ export default function EducationFields() {
       summaryId: activeSummary.id,
       summary: textAreaData,
     };
-    Http.post("education/editOrDeleteEducation", body, false)
+    httpService
+      .post("education/editOrDeleteEducation", body)
       .then((res: any) => {
-        if (res.status === 200) {
-          toast.success(res.data?.data?.message);
+        if (res.statusText === "OK") {
+          toast.success(res.data?.message);
           getSummaries();
           setIsOpen(false);
         }
-        console.log(res);
       })
       .catch((err) => {
-        toast.error(err.response?.data?.error);
+        toast.error(err.response);
       });
-    console.log("submit");
   };
 
   const onDelete = () => {
     console.log("delete");
+    const body = {
+      educationId: id,
+      summaryId: activeSummary.id,
+      active: false,
+    };
+    httpService
+      .post("education/editOrDeleteEducation", body)
+      .then((res: any) => {
+        if (res.statusText === "OK") {
+          toast.success(res.data?.message);
+          getSummaries();
+          setIsOpen(false);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response);
+      });
   };
   return (
     <>
@@ -106,6 +120,7 @@ export default function EducationFields() {
         description="Add or Edit available Education Summaries"
       />
       <Breadcrumb />
+      <div className="mt-5"></div>
       <div className="flex flex-col gap-3">
         {allSummaries.map((summary: summaryTypes, index) => (
           <SummaryCard

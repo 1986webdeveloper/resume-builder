@@ -15,13 +15,14 @@ export default function ButtonWithIcon({
   icon,
   color,
   disable = false,
+  customClass = "",
 }: ComponentTypes) {
   return (
     <button
       className={`mt-5 tracking-wide font-semibold ${
         disable
           ? "bg-indigo-200 cursor-not-allowed"
-          : `${color} hover:bg-hover-primary`
+          : `${color} hover:bg-hover-primary ${customClass}`
       } text-gray-100 w-full py-4 rounded-lg  transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
       disabled={disable as boolean}
     >

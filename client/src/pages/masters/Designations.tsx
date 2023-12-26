@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import Card from "../../components/shared/Card";
 import { useParams } from "react-router-dom";
-import { getDesignations } from "../../services/masters/designation/getDesignations";
 import AddModal from "../../components/sections/AddModal";
-import { addDesignation } from "../../services/masters/designation/addDesignation";
 import { toast } from "react-toastify";
-import { deleteDesignation } from "../../services/masters/designation/deleteDesignation";
-import { getAllowedDesignations } from "../../services/masters/designation/getAllowedDesignations";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import Breadcrumb from "../../components/shared/Breadcrumb";
+import { httpService } from "../../services/https";
 
 export default function Designations() {
   interface designationType {
@@ -35,19 +32,18 @@ export default function Designations() {
   const [allowedDesignations, setAllowedDesignations] = useState([]);
   const [textAreaData, setTextAreaData] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
   const [openedId, setOpenedID] = useState("");
-  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
 
   const { collection } = useParams();
-  const token = localStorage.getItem("token");
 
   const getAvailableDesignations = () => {
     setIsLoading(true);
-    getDesignations(token)
-      .then((res) => {
+    httpService
+      .get(`admin/getDesignationOrSummaryList`)
+      .then((res: any) => {
         if (res.status === 200) {
           setIsLoading(false);
-          console.log(res);
           setAvailableDesignations(res.data?.data);
           localStorage.setItem("designations", JSON.stringify(res.data?.data));
         }
@@ -58,7 +54,7 @@ export default function Designations() {
   };
 
   const getAllowedDesignationsFirst = () => {
-    getAllowedDesignations(token).then((res) => {
+    httpService.get(`admin/getAllowedDesignation`).then((res: any) => {
       if (res.status === 200) {
         setAllowedDesignations(res.data?.data);
       }
@@ -70,77 +66,86 @@ export default function Designations() {
     getAllowedDesignationsFirst();
   }, [collection]);
 
-  const handleOpenAddModal = () => {
+  const openModal = (id: string, type: string = "add") => {
+    setOpenedID(id);
+    setModalType(type);
     setIsOpen(true);
   };
 
-  const handleModalClose = () => {
-    console.log("close");
+  const closeModal = () => {
     setIsOpen(false);
   };
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    if (data?.designation && textAreaData) {
-      addDesignation(
-        token,
-        { designation: data?.designation, summary: textAreaData },
-        collection
-      )
-        .then((res) => {
-          if (res.status === 201) {
-            getAvailableDesignations();
-            toast.success(res.data?.message);
-            setIsOpen(false);
-          }
-        })
-        .catch((err) => {
-          toast.error(err.response?.data?.data?.error);
-        });
-    }
+  const onAdd: SubmitHandler<Inputs> = (data) => {
+    const body = {
+      name: data?.designation,
+      summary: textAreaData,
+      type: collection?.toUpperCase(),
+    };
+    httpService
+      .post(`admin/addDesignationSummary`, body)
+      .then((res: any) => {
+        if (res.status === 201) {
+          getAvailableDesignations();
+          toast.success(res.data?.message);
+          setIsOpen(false);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response);
+      });
   };
 
-  const handleDeleteModalClose = () => {
-    setIsOpenDeleteModal(false);
-  };
-
-  const handleOpenDeleteModal = (id: string) => {
-    setOpenedID(id);
-    setIsOpenDeleteModal(true);
-  };
-
-  const handleDelete = () => {
-    if (openedId) {
-      deleteDesignation(token, openedId)
-        .then((res) => {
-          if (res.status === 200) {
-            getAvailableDesignations();
-            toast.error(res.data?.message);
-            setIsOpenDeleteModal(false);
-          }
-        })
-        .catch((err) => {
-          toast.error(err.response?.data?.data?.error);
-        });
-    }
+  const onDelete = () => {
+    const body = {
+      designationId: openedId,
+      active: false,
+    };
+    httpService
+      .post(`admin/updateDesignationOrSummary`, body)
+      .then((res: any) => {
+        if (res.status === 200) {
+          getAvailableDesignations();
+          toast.error(res.data?.message);
+          setIsOpen(false);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response);
+      });
   };
 
   return (
     <>
       <Header
-        handleOpenAddModal={handleOpenAddModal}
+        handleOpenAddModal={openModal}
         title="Choose Designation"
         description="Select the designation which you want to modify."
       />
       <Breadcrumb />
-      {isOpen && (
-        <form
-          className="mx-auto max-w-xs mt-3"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <AddModal
-            handleModalClose={handleModalClose}
-            modalTitle="Add Designation"
-          >
+
+      {isLoading ? (
+        <div className="font-bold text-xl">Loading...</div>
+      ) : (
+        <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
+          {availableDesignations.map((designation, index) => (
+            <Card
+              key={index}
+              id={designation._id}
+              title={designation.name}
+              description="We've designed and built ecommerce experiences that have
+                driven sales."
+              route={designation.name}
+              handleOpenDeleteModal={openModal}
+              isEditable={false}
+            />
+          ))}
+        </div>
+      )}
+
+      {isOpen && modalType === "add" && (
+        <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
+          <AddModal handleModalClose={closeModal} modalTitle="Add Designation">
             <div>
               <div className="flex flex-col gap-4">
                 <div>
@@ -172,29 +177,8 @@ export default function Designations() {
         </form>
       )}
 
-      {isOpenDeleteModal && (
-        <Modal
-          handleDeleteModalClose={handleDeleteModalClose}
-          handleDelete={handleDelete}
-        />
-      )}
-
-      {isLoading ? (
-        <div className="font-bold text-xl">Loading...</div>
-      ) : (
-        <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
-          {availableDesignations.map((designation, index) => (
-            <Card
-              key={index}
-              id={designation._id}
-              title={designation.name}
-              description="We've designed and built ecommerce experiences that have
-                driven sales."
-              route={designation.name}
-              handleOpenDeleteModal={handleOpenDeleteModal}
-            />
-          ))}
-        </div>
+      {isOpen && modalType === "delete" && (
+        <Modal handleDeleteModalClose={closeModal} handleDelete={onDelete} />
       )}
     </>
   );

@@ -1,4 +1,4 @@
-import { MdDelete, MdModeEditOutline, MdAddCircle } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import PropTypes, { InferProps } from "prop-types";
 import { NavLink } from "react-router-dom";
 
@@ -17,19 +17,17 @@ export default function EducationCard({
 }: ComponentTypes) {
   return (
     <div className="flex flex-col gap-2 px-4 py-4 shadow-xl border rounded-lg">
-      <NavLink to={`${title}`} state={{ id: id }}>
-        <div className="flex gap-2 items-center justify-between">
+      <div className="flex gap-2 items-center justify-between">
+        <NavLink to={`${title}`} state={{ id: id }}>
           <h1 className="font-bold text-lg capitalize">{title}</h1>
-          <div className="flex gap-2">
-            <span
-              className="cursor-pointer"
-              onClick={() => handleOpenDeleteModal(id)}
-            >
-              <MdDelete size={18} />
-            </span>
-          </div>
-        </div>
-      </NavLink>
+        </NavLink>
+        <span
+          className="cursor-pointer"
+          onClick={() => handleOpenDeleteModal(id, "delete")}
+        >
+          <MdDelete size={18} />
+        </span>
+      </div>
     </div>
   );
 }

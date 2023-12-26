@@ -1,16 +1,13 @@
 import SummaryCard from "../../components/shared/SummaryCard";
 import { useEffect, useState } from "react";
-import { getSkills } from "../../services/masters/skills/getSkills";
 import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { addSkill } from "../../services/masters/skills/addSkill";
 import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
-import { updateSkill } from "../../services/masters/skills/updateSkill";
-import { deleteSkill } from "../../services/masters/skills/deleteSkill";
 import Header from "../../components/shared/Header";
 import Breadcrumb from "../../components/shared/Breadcrumb";
+import { httpService } from "../../services/https";
 
 interface skillTypes {
   name: string;
@@ -20,11 +17,8 @@ interface skillTypes {
 export default function Skills() {
   const [allSkills, setAllSkills] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
-  const [isOpenEditModal, setIsOpenEditModal] = useState(false);
-  const [openedId, setOpenedID] = useState("");
+  const [modalType, setModalType] = useState("");
   const [activeSkill, setActiveSkill] = useState({ id: "", skill: "" });
-  const token = localStorage.getItem("token") || "";
 
   type Inputs = {
     skill: string;
@@ -39,9 +33,8 @@ export default function Skills() {
   } = useForm<Inputs>();
 
   const getAllSkills = () => {
-    getSkills(token).then((res) => {
+    httpService.get(`skills/getAllSkills`).then((res: any) => {
       if (res.status === 200) {
-        console.log(res);
         setAllSkills(res.data?.data);
       }
     });
@@ -51,35 +44,22 @@ export default function Skills() {
     getAllSkills();
   }, []);
 
-  const handleOpenAddModal = () => {
+  const openModal = (
+    id: string = "",
+    skill: string = "",
+    type: string = "add"
+  ) => {
+    setModalType(type);
+    setActiveSkill({ id: id, skill: skill });
+    if (type === "edit") setValue("skill", skill);
     setIsOpen(true);
   };
 
-  const handleOpenDeleteModal = (id: string) => {
-    setOpenedID(id);
-    setIsOpenDeleteModal(true);
-  };
-  const handleDeleteModalClose = () => {
-    setIsOpenDeleteModal(false);
-  };
-  const handleEditModalOpen = (id: string, skill: string) => {
-    console.log(skill, id);
-    setValue("skill", skill);
-    setActiveSkill({ id: id, skill: skill });
-    setIsOpenEditModal(true);
-  };
-
-  const handleEditModalClose = () => {
-    reset();
-    setIsOpenEditModal(false);
-  };
-  const handleModalClose = () => {
-    setIsOpen(false);
-  };
-
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    addSkill(token, { name: data.skill })
-      .then((res) => {
+  const onAdd: SubmitHandler<Inputs> = (data) => {
+    httpService
+      .post(`skills/addSkills`, { name: data.skill })
+      .then((res: any) => {
+        console.log(res);
         if (res.status === 201) {
           getAllSkills();
           toast.success(res.data?.message);
@@ -88,50 +68,55 @@ export default function Skills() {
         }
       })
       .catch((err) => {
-        toast.error(err.response?.data?.error);
+        toast.error(err.response);
       });
   };
 
-  const onEditSubmit = (data: any) => {
-    console.log(activeSkill);
-    updateSkill(token, {
+  const onEdit = (data: any) => {
+    const body = {
       skillId: activeSkill.id,
       name: data.skill,
-    })
-      .then((res) => {
+    };
+    httpService
+      .post("skills/editOrDelete", body)
+      .then((res: any) => {
         if (res.status === 200) {
           getAllSkills();
           toast.success(res.data?.message);
-          setIsOpenEditModal(false);
+          setIsOpen(false);
           reset();
         }
       })
       .catch((err) => {
-        console.log(err);
-        toast.error(err.response?.data?.error);
+        toast.error(err.response);
       });
   };
 
-  const handleDelete = () => {
-    if (openedId) {
-      console.log(openedId);
-      deleteSkill(token, { skillId: openedId })
-        .then((res) => {
-          if (res.status === 200) {
-            toast.error(res.data?.message);
-            setIsOpenDeleteModal(false);
-            getAllSkills();
-          }
-        })
-        .catch((err) => {
-          toast.error(err.response?.data?.error);
-        });
+  const onDelete = () => {
+    httpService
+      .post("skills/editOrDelete", { skillId: activeSkill.id, active: false })
+      .then((res: any) => {
+        if (res.status === 200) {
+          toast.error(res.data?.message);
+          setIsOpen(false);
+          getAllSkills();
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response);
+      });
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+    if (modalType === "edit") {
+      reset();
     }
   };
   return (
     <>
       <Header
-        handleOpenAddModal={handleOpenAddModal}
+        handleOpenAddModal={openModal}
         title="Available Skills"
         description="Add or Edit available Skills"
       />
@@ -142,17 +127,14 @@ export default function Skills() {
             key={index}
             summary={skill.name}
             id={skill._id}
-            handleOpenDeleteModal={handleOpenDeleteModal}
-            handleEditModalOpen={handleEditModalOpen}
+            handleOpenDeleteModal={openModal}
+            handleEditModalOpen={openModal}
           />
         ))}
       </div>
-      {isOpen && (
-        <form
-          className="mx-auto max-w-xs mt-3"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <AddModal handleModalClose={handleModalClose} modalTitle="Add Skill">
+      {isOpen && modalType === "add" && (
+        <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
+          <AddModal handleModalClose={closeModal} modalTitle="Add Skill">
             <div>
               <div className="max-w-md">
                 <Input
@@ -175,15 +157,9 @@ export default function Skills() {
         </form>
       )}
 
-      {isOpenEditModal && (
-        <form
-          className="mx-auto max-w-xs mt-3"
-          onSubmit={handleSubmit(onEditSubmit)}
-        >
-          <AddModal
-            handleModalClose={handleEditModalClose}
-            modalTitle="Edit Skill"
-          >
+      {isOpen && modalType === "edit" && (
+        <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onEdit)}>
+          <AddModal handleModalClose={closeModal} modalTitle="Edit Skill">
             <div>
               <div className="max-w-md">
                 <Input
@@ -206,11 +182,8 @@ export default function Skills() {
         </form>
       )}
 
-      {isOpenDeleteModal && (
-        <Modal
-          handleDeleteModalClose={handleDeleteModalClose}
-          handleDelete={handleDelete}
-        />
+      {isOpen && modalType === "delete" && (
+        <Modal handleDeleteModalClose={closeModal} handleDelete={onDelete} />
       )}
     </>
   );
