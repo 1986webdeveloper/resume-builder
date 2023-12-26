@@ -21,6 +21,7 @@ export const errorTypeIsInvalid = 'Invalid type!'
 export const errorSkillsAlreadyExist = 'Skill already exits'
 export const errorResumeNotFound = 'Resume not found'
 export const errorDataTypeAlreadyExist = 'Data type already exists'
+export const errorFieldAlreadyExists = 'Filed already exists'
 //SUCCESS message
 export const successUserCreated = "User registered successfully! please verify your email";
 export const successPleaseverifyEmail = "Please verify your email";

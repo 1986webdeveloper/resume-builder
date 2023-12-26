@@ -62,9 +62,8 @@ export class GeographicalService {
         let list: any = []
         if (userInput.search_text) {
             options['name'] = { '$regex': userInput.search_text }
-
-            list = await GeographicalHelper.getAllCounties(options)
         }
+        list = await GeographicalHelper.getAllCounties(options)
         const responseData = {
             data: list,
             message: Success
@@ -123,3 +122,4 @@ export class GeographicalService {
 
 
 }
+

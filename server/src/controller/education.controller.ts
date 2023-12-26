@@ -4,6 +4,7 @@ import { HttpError, checkValidation } from "../common/error.service";
 import { educationService } from "../service/education.service";
 import { Success, errorRecordNotUpdated } from "../common/string";
 import { ACTIVE, DE_ACTIVE, } from "../common/constant";
+import { Types } from "mongoose";
 
 export class EducationController {
     constructor() { }
@@ -110,15 +111,39 @@ export class EducationController {
     //#region  get education details
     static async getEducationDetails(req: Request, res: Response, next: NextFunction): Promise<Response> {
         const input = req.query
-        const educationId = input.educationId
-        const filter: any = { is_active: ACTIVE }
-        const attributes = ['_id', 'summaries', 'performances', 'degreeType', 'is_active']
+        const options: any = [{ $match: { is_active: ACTIVE } }]
+        const educationId: any = input.educationId
         let list: any = []
         if (educationId) {
-            filter._id = educationId
-            list = await educationService.getEducation(filter, attributes)
+
+            options.push({ $match: { _id: new Types.ObjectId(educationId) } })
+            options.push({ $unwind: "$summaries" })
+            options.push({ $unwind: "$performances" })
+            options.push({ $match: { "performances.is_active": ACTIVE } })
+            options.push({ $match: { "summaries.is_active": ACTIVE } })
+            options.push({
+                $group:
+                {
+                    _id: "$_id", // Group key
+                    "summaries": { $push: "$summaries" },
+                    "performances": { $push: "$performances" }
+
+                },
+            }
+            )
+            list = await educationService.getAllAggregationEducation(options)
         } else
-            list = await educationService.getAllEducation(filter, attributes)
+            options.push(
+                {
+                    $project:
+                    {
+                        '_id': 1,
+                        'degreeType': "$degreeType",
+                        'is_active': "$is_active"
+                    }
+                }
+            )
+        list = await educationService.getAllAggregationEducation(options)
         //response data
         const responseData = {
             message: Success,

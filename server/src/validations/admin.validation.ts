@@ -1,5 +1,5 @@
 import {
-    IsNotEmpty, IsString, IsIn, IsOptional, ValidateIf, IsBoolean
+    IsNotEmpty, IsString, IsIn, IsOptional, ValidateIf, IsBoolean, IsObject
 
 } from 'class-validator'
 import { Transform } from 'class-transformer'
@@ -19,8 +19,8 @@ export class AddDesignationSummary {
     type!: string
 
     @IsNotEmpty()
-    @IsString()
-    userId!: string
+    @IsObject()
+    userId!: Types.ObjectId
 
 }
 export class CreateSkills {
@@ -30,8 +30,8 @@ export class CreateSkills {
     name!: string
 
     @IsNotEmpty()
-    @IsString()
-    userId!: string
+    @IsObject()
+    userId!: Types.ObjectId
 
 }
 
@@ -50,10 +50,11 @@ export class EditDesignationAndSummary {
     title!: string
 
     @IsNotEmpty()
-    @IsString()
-    userId!: string
+    @IsObject()
+    userId!: Types.ObjectId
 
     @ValidateIf((obj) => !obj.title)
     @IsBoolean()
     active!: boolean
 }
+

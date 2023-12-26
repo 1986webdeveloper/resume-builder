@@ -7,6 +7,7 @@ import {
 } from "../common/string";
 import { HTTP_STATUS_CODE } from "../common/constant";
 import { CryptoService } from "../common/crypt.service";
+import { Types } from "mongoose";
 
 //#region  verify otp
 export async function verifyToken(
@@ -63,14 +64,14 @@ export async function userAuth(
       errorPleaseProvideAccessToken,
       HTTP_STATUS_CODE.unauthorized,
     );
-  const userId = is_verified?.userId;
+  let userId = is_verified?.userId;
   const checkUser = await userService.checkUserExists({ _id: userId, token }, true);
   if (!checkUser)
     throw new HttpError(
       errorPleaseProvideAccessToken,
       HTTP_STATUS_CODE.unauthorized,
     );
-
+  userId = new Types.ObjectId(userId)
   req.body.userId = userId;
   req.query.userId = userId;
   next();

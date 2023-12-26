@@ -22,7 +22,7 @@ export class AddEducation {
     @ValidateNested()
     performance!: Performance
 
-    @IsString()
+    @IsObject()
     userId!: Types.ObjectId
 }
 
@@ -56,7 +56,7 @@ export class EditOrDeleteEducation {
     @ValidateNested()
     performance!: Performance
 
-    @IsString()
+    @IsObject()
     userId!: Types.ObjectId
 
     @ValidateIf((obj) => !obj.degreeType && !obj.summary && !obj.performance)

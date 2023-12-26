@@ -13,6 +13,7 @@ import {
 import { Success, errorDesignationIsNotValue, errorTypeIsInvalid, successDegignationCreated } from '../common/string'
 import { HttpError, checkValidation } from '../common/error.service'
 import { adminService } from '../service/admin.service'
+import { Types } from 'mongoose'
 
 //resume controller resume
 export class AdminController {
@@ -73,7 +74,7 @@ export class AdminController {
         await checkValidation(userInput);
         //check is delete or active task
         const is_enable = userInput.active == ACTIVE || userInput.active == DE_ACTIVE
-        const update_where: any = { _id: userInput.designationId }
+        const update_where: any = { _id: new Types.ObjectId(userInput.designationId) }
         const updateData: any = {}
         //check update summary or designation title
         if (userInput.summaryId) {
@@ -152,6 +153,8 @@ export class AdminController {
 
     }
     //#endregion
+
+
 
 
 }

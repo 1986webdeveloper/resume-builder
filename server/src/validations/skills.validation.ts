@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString, ValidateIf } from "class-validator"
+import { IsBoolean, IsNotEmpty, IsObject, IsString, ValidateIf } from "class-validator"
 import { Types } from "mongoose"
 import { ACTIVE, DE_ACTIVE } from "../common/constant"
 
@@ -9,8 +9,8 @@ export class AddSkills {
 
 
     @IsNotEmpty()
-    @IsString()
-    userId!: string
+    @IsObject()
+    userId!: Types.ObjectId
 }
 
 export class EditOrDeleteSkills {
@@ -24,9 +24,10 @@ export class EditOrDeleteSkills {
     @IsString()
     name!: string
 
+
     @IsNotEmpty()
-    @IsString()
-    userId!: string
+    @IsObject()
+    userId!: Types.ObjectId
 
     @ValidateIf((obj) => !obj.name)
     @IsBoolean()

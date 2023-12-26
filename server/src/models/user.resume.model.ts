@@ -9,6 +9,10 @@ const userResumeModel = new mongoose.Schema({
                 type: String,
                 required: true,
             },
+            is_active: {
+                type: Boolean,
+                default: ACTIVE
+            },
             data: {
                 type: [Object],
                 required: true,
@@ -23,6 +27,11 @@ const userResumeModel = new mongoose.Schema({
         required: true,
         ref: ModelName.userModel,
     },
+    currentStep: {
+        type: String,
+        required: true,
+    },
+
 }, {
     timestamps: true,
 });

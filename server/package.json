@@ -55,6 +55,7 @@
     "nodemailer": "^6.9.7",
     "npm": "^10.2.5",
     "pg": "^8.11.3",
+    "puppeteer": "^21.6.1",
     "sequelize": "^6.35.1",
     "sequelize-typescript": "^2.1.6",
     "world-universities-search": "^1.0.4"

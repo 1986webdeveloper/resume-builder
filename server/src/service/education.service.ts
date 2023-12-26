@@ -32,10 +32,17 @@ export const educationService = new class {
     //#endregion
 
     //#region  get all education
-
     async getAllEducation(options: any, attributes: [] | string[] = []) {
-        return EducationModel.find(options)
+        return await EducationModel.find(options)
             .select(attributes)
     }
     //#endregion
+
+    //#region  get aggregation education
+    async getAllAggregationEducation(options: any) {
+        return await EducationModel.aggregate(options)
+    }
+    //#endregion
+
+
 }

@@ -1,11 +1,11 @@
 import {
     IsNotEmpty, IsString, IsEmail,
     IsOptional, ValidateNested, IsArray,
-    ValidateIf, IsMobilePhone, IsIn, IsObject, IsEnum, IsDate, IsBoolean, isIn, validate,
+    ValidateIf, IsMobilePhone, IsIn, IsObject, IsEnum, IsDate, IsBoolean, isIn, validate, IsNumber,
 
 } from 'class-validator'
 import { Types } from 'mongoose';
-import { PRE_DEFINED_ALLOWED_VALUES, RESUME_STEP } from '../common/constant';
+import { ACTIVE, DE_ACTIVE, PRE_DEFINED_ALLOWED_VALUES, RESUME_STEP } from '../common/constant';
 import { Transform } from 'class-transformer';
 
 // class Link {
@@ -128,13 +128,14 @@ export class Designation {
 }
 
 export class UserResumeMaster {
-    @IsEnum(RESUME_STEP)
+
+
+    @IsString()
     step!: String
 
-    @ValidateIf(obj => obj?.step != RESUME_STEP.personal && obj?.step)
     @Transform((value: any) => value ? new Types.ObjectId(value) : null)
     @IsNotEmpty()
-    @IsString()
+    @IsObject()
     resumeId!: Types.ObjectId
 
     @IsNotEmpty()
@@ -178,4 +179,116 @@ export class CreateDataTypes {
     @Transform((value: any) => value ? new Types.ObjectId(value) : null)
     @IsNotEmpty()
     userId!: Types.ObjectId
+}
+
+export class GetResumeList {
+
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    @IsNotEmpty()
+    userId!: Types.ObjectId
+
+    @IsOptional()
+    search_text!: String
+
+}
+
+export class CreateResumeSchema {
+
+    @IsOptional()
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    sectionId!: Types.ObjectId
+
+    @ValidateIf(obj => !obj?.sectionId)
+    @Transform(obj => obj?.value?.trim()?.toLowerCase())
+    @IsNotEmpty()
+    title!: String
+
+    @ValidateIf(obj => obj?.sectionId)
+    @Transform(obj => obj?.value?.trim())
+    @IsNotEmpty()
+    fieldName!: String
+
+    @ValidateIf(obj => obj?.sectionId)
+    @IsArray()
+    dataTypes!: string[]
+
+
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    @IsNotEmpty()
+    userId!: Types.ObjectId
+}
+
+
+export class EditOrDeleteResumeSchema {
+    @IsNotEmpty()
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    schemaId!: Types.ObjectId
+
+    @ValidateIf((obj) =>
+        !obj.fieldId &&
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
+    @IsNotEmpty()
+    sectionTitle!: string
+
+    @IsOptional()
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    fieldId!: Types.ObjectId
+
+    @ValidateIf((obj) =>
+        obj.fieldId &&
+        (obj?.dataTypes ?? []).length == 0 &&
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
+    @IsNotEmpty()
+    fieldName!: string
+
+    @ValidateIf((obj) =>
+        obj.fieldId
+        && !obj.fieldName &&
+        ![ACTIVE, DE_ACTIVE].includes(obj.active))
+    @IsNotEmpty()
+    @IsArray()
+    dataTypes!: string[]
+
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    @IsNotEmpty()
+    userId!: Types.ObjectId
+
+    @IsOptional()
+    @IsBoolean()
+    active!: boolean
+}
+
+export class ChangeOrderSchema {
+    @IsNotEmpty()
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    schemaId!: Types.ObjectId
+
+    @IsNotEmpty()
+    @IsNumber()
+    order!: number
+
+}
+
+export class EditOrDeleteResume {
+    @IsNotEmpty()
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    resumeId!: Types.ObjectId
+
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    @IsNotEmpty()
+    sectionId!: Types.ObjectId
+
+    @ValidateIf((obj) => Object.keys(obj.data).length > 0)
+    @Transform((value: any) => value ? new Types.ObjectId(value) : null)
+    @IsNotEmpty()
+    elementId!: Types.ObjectId
+
+    @ValidateIf((obj) => obj.elementId)
+    @IsNotEmpty()
+    @IsObject()
+    data!: any
+
+    @IsOptional()
+    @IsBoolean()
+    active!: boolean
 }

@@ -26,10 +26,11 @@ export const asyncHandler =
           .json({ error: errorObj.message });
       } else {
         console.log({ errorObj })
+        const message = errorObj?.error ?? "Internal Server Error"
         // Handle other types of errors
         return res
           .status(HTTP_STATUS_CODE.internal_error)
-          .json({ error: "Internal Server Error" });
+          .json({ error: message });
       }
     });
   };
@@ -37,7 +38,9 @@ export const asyncHandler =
 
 //#region validation payloads
 export const checkValidation = async (userInput: any) => {
+
   //check validation payloads
+
   const validateUser = await validate(userInput);
   const isErrorFound: any = validateUser.find((val) => true);
   const messageObj = isErrorFound?.constraints ?? {};
