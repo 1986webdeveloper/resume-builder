@@ -1,8 +1,5 @@
-import { useState } from "react";
-import AddModal from "../../components/sections/AddModal";
 import Card from "../../components/shared/Card";
-import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 export default function Masters() {
   const availCollections = [
@@ -11,33 +8,15 @@ export default function Masters() {
     { name: "Education", route: "education" },
     { name: "Skills", route: "skills" },
   ];
-  const [isOpen, setIsOpen] = useState(false);
-  const handleModalClose = () => {
-    console.log("close");
-    setIsOpen(false);
-  };
 
-  const handleDelete = () => {
-    console.log("record delete");
-  };
-
-  const handleOpenAddModal = () => {
-    setIsOpen(true);
-  };
   return (
     <>
-      <Header
-        handleOpenAddModal={handleOpenAddModal}
-        title="Choose Collection"
-        description="Select the collection which you want to modify."
-      />
-      <Breadcrumb />
-      {isOpen && (
-        <AddModal
-          handleModalClose={handleModalClose}
-          handleDelete={handleDelete}
-        />
-      )}
+      <div className="w-full mt-3 relative">
+        <h1 className="font-bold text-3xl text-center">Choose Collection</h1>
+      </div>
+      <div className="mt-2">
+        <CustomBreadcrumb />
+      </div>
       <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
         {availCollections.map((collection, index) => (
           <Card
@@ -46,6 +25,8 @@ export default function Masters() {
             description="We've designed and built ecommerce experiences that have
                 driven sales."
             route={collection.route}
+            isDeletable={false}
+            isEditable={false}
           />
         ))}
       </div>

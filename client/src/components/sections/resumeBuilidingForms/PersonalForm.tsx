@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
 import { Button, Datepicker, Label, Select, TextInput } from "flowbite-react";
-import ButtonWithIcon from "../../shared/ButtonWithIcon";
-import { FaUserPlus } from "react-icons/fa6";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentStep } from "../../../store/slices/currentStepSlice";
+import { RootState } from "../../../store/store";
+import { updateFormData } from "../../../store/slices/formDataSlice";
 
 interface Inputs {
   full_name: string;
@@ -30,12 +32,18 @@ interface cityTypes {
   name: string;
 }
 
-export default function PersonalForm() {
+interface propTypes {
+  id: string;
+}
+
+export default function PersonalForm({ id }: propTypes) {
   const [allCountries, setAllCountries] = useState([] as countryTypes[]);
   const [selectedCountry, setSelectedCountry] = useState({} as countryTypes);
   const [selectedState, setSelectedState] = useState({} as stateTypes);
   const [allStates, setAllStates] = useState([] as stateTypes[]);
   const [allCities, setAllCities] = useState([] as cityTypes[]);
+  const dispatch = useDispatch();
+  const formData = useSelector((state: RootState) => state.formData.value);
 
   const {
     register,
@@ -43,7 +51,9 @@ export default function PersonalForm() {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: { ...formData[0]?.data[0] },
+  });
 
   const getAllCountries = () => {
     httpService.get(`helper/getAllCounties`).then((res: any) => {
@@ -54,25 +64,27 @@ export default function PersonalForm() {
   };
 
   const getAllStates = () => {
-    httpService
-      .get(`helper/getAllState?countryCode=${selectedCountry.code}`)
-      .then((res: any) => {
-        if (res.status === 200) {
-          setAllStates(res.data?.data);
-        }
-      });
+    if (selectedCountry?.code)
+      httpService
+        .get(`helper/getAllState?countryCode=${selectedCountry.code}`)
+        .then((res: any) => {
+          if (res.status === 200) {
+            setAllStates(res.data?.data);
+          }
+        });
   };
 
   const getAllCities = () => {
-    httpService
-      .get(
-        `helper/getAllCities?countryCode=${selectedCountry.code}&stateCode=${selectedState.stateCode}`
-      )
-      .then((res: any) => {
-        if (res.status === 200) {
-          setAllCities(res.data?.data);
-        }
-      });
+    if (selectedCountry?.code && selectedState?.stateCode)
+      httpService
+        .get(
+          `helper/getAllCities?countryCode=${selectedCountry.code}&stateCode=${selectedState.stateCode}`
+        )
+        .then((res: any) => {
+          if (res.status === 200) {
+            setAllCities(res.data?.data);
+          }
+        });
   };
 
   useEffect(() => {
@@ -110,11 +122,35 @@ export default function PersonalForm() {
   }, [selectedState]);
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
+    const body = {
+      step: id,
+      data: {
+        ...data,
+        country: selectedCountry.code,
+        state: selectedState.stateCode,
+      },
+    };
+    httpService.post(`resume/createUserResume`, body).then((res: any) => {
+      if (res.status === 201) {
+        dispatch(
+          setCurrentStep({
+            value: res.data?.data?.currentStep?.slug,
+            id: res.data?.data?.currentStep?.sectionID,
+          })
+        );
+        dispatch(updateFormData(res.data?.data?.previewData?.steps));
+        // navigate(`/resume/${res.data?.data?.currentStep?.slug}`, {
+        //   state: {
+        //     id: res.data?.data?.currentStep?.sectionID,
+        //     resumeId: res.data?.data?.previewData?._id,
+        //   },
+        // });
+      }
+    });
   };
   return (
     <form
-      className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border self-center justify-center"
+      className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex gap-5 w-full">
@@ -180,8 +216,12 @@ export default function PersonalForm() {
                   message: "There should be no empty spaces.",
                 },
               })}
+              defaultValue=""
               color={errors?.country ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select Country
+              </option>
               {allCountries.map((country: countryTypes) => (
                 <option key={country.name}>{country.name}</option>
               ))}
@@ -204,8 +244,12 @@ export default function PersonalForm() {
                   message: "There should be no empty spaces.",
                 },
               })}
+              defaultValue=""
               color={errors?.state ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select State
+              </option>
               {allStates.map((state: stateTypes) => (
                 <option key={state.name}>{state.name}</option>
               ))}
@@ -230,8 +274,12 @@ export default function PersonalForm() {
                   message: "There should be no empty spaces.",
                 },
               })}
+              defaultValue=""
               color={errors?.city ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select City
+              </option>
               {allCities.map((city) => (
                 <option key={city.name}>{city.name}</option>
               ))}
@@ -254,7 +302,6 @@ export default function PersonalForm() {
               })}
               id="mobileNo"
               type="text"
-              placeholder="name@flowbite.com"
               color={errors?.mobileNo ? "failure" : ""}
             />
             {errors.mobileNo?.type && (
@@ -294,7 +341,7 @@ export default function PersonalForm() {
           </div>
           <div>
             <div className="mb-2 block">
-              <Label htmlFor="mobileNo" value="Address" />
+              <Label htmlFor="address" value="Address" />
             </div>
             <TextInput
               {...register("address", {
@@ -319,11 +366,9 @@ export default function PersonalForm() {
           </div>
         </div>
       </div>
-      <ButtonWithIcon
-        label="Continue"
-        icon={<FaUserPlus size={20} />}
-        color="bg-primary"
-      />
+      <Button type="submit" color="success" className="px-10 mt-9 mx-auto">
+        Continue
+      </Button>
     </form>
   );
 }

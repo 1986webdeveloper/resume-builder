@@ -7,8 +7,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 export default function Designations() {
   interface designationType {
@@ -122,8 +122,7 @@ export default function Designations() {
         title="Choose Designation"
         description="Select the designation which you want to modify."
       />
-      <Breadcrumb />
-
+      <CustomBreadcrumb />
       {isLoading ? (
         <div className="font-bold text-xl">Loading...</div>
       ) : (

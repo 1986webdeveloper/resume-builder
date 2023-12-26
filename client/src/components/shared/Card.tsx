@@ -9,8 +9,9 @@ const ComponentPropTypes = {
   description: PropTypes.string,
   route: PropTypes.string,
   id: PropTypes.string,
-  handleOpenDeleteModal: PropTypes.func.isRequired,
+  handleOpenDeleteModal: PropTypes.any,
   isEditable: PropTypes.bool,
+  isDeletable: PropTypes.bool,
 };
 
 type ComponentTypes = InferProps<typeof ComponentPropTypes>;
@@ -22,6 +23,7 @@ export default function Card({
   id,
   handleOpenDeleteModal,
   isEditable = true,
+  isDeletable = true,
 }: ComponentTypes) {
   return (
     <div>
@@ -29,12 +31,14 @@ export default function Card({
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-semibold capitalize">{title}</h3>
           <div className="flex gap-2">
-            <span
-              className="cursor-pointer"
-              onClick={() => handleOpenDeleteModal(id, "delete")}
-            >
-              <MdDelete size={18} />
-            </span>
+            {isDeletable && (
+              <span
+                className="cursor-pointer"
+                onClick={() => handleOpenDeleteModal(id, "delete")}
+              >
+                <MdDelete size={18} />
+              </span>
+            )}
             {isEditable && (
               <span className="cursor-pointer">
                 <MdModeEditOutline size={18} />

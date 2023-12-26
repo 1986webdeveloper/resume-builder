@@ -20,11 +20,11 @@ export default function Header({
     <div className="max-w-full sm:text-center">
       <div className="flex justify-between items-center">
         <div className="self-center mx-auto">
-          <h2 className="md:text-5xl text-3xl font-semibold tracking-tight">
+          <h2 className="md:text-4xl text-3xl font-semibold tracking-tight">
             {title}
           </h2>
           <div className="flex justify-center">
-            <p className=" mt-6 text-xl/8 font-medium text-gray-500 ">
+            <p className=" mt-3 text-xl/8 font-medium text-gray-500 ">
               {description}
             </p>
           </div>

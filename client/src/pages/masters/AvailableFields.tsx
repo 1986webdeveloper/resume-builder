@@ -6,8 +6,8 @@ import RichTextEditor from "../../components/shared/RichTextEditor";
 import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 type summarytypes = {
   _id: string;
@@ -130,7 +130,7 @@ export default function AvailableFields() {
         title="All Summaries"
         description="Add or Edit available summaries."
       />
-      <Breadcrumb />
+      <CustomBreadcrumb />
       <div className="flex flex-col gap-5 w-full">
         {availableSummaries.map((item: summarytypes) => (
           <SummaryCard

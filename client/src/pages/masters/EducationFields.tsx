@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import SummaryCard from "../../components/shared/SummaryCard";
 import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
@@ -9,6 +8,7 @@ import Modal from "../../components/sections/DeleteModal";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 interface summaryTypes {
   summary: string;
@@ -119,7 +119,7 @@ export default function EducationFields() {
         title="Available Education Summaries"
         description="Add or Edit available Education Summaries"
       />
-      <Breadcrumb />
+      <CustomBreadcrumb />
       <div className="mt-5"></div>
       <div className="flex flex-col gap-3">
         {allSummaries.map((summary: summaryTypes, index) => (

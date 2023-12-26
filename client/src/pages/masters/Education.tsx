@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import EducationCard from "../../components/shared/EducationCard";
 import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
@@ -9,6 +8,7 @@ import RichTextEditor from "../../components/shared/RichTextEditor";
 import { toast } from "react-toastify";
 import { httpService } from "../../services/https";
 import Modal from "../../components/sections/DeleteModal";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 interface educationTypes {
   _id: string;
@@ -114,7 +114,7 @@ export default function Education() {
         title="Available Education"
         description="Add or Edit available Education"
       />
-      <Breadcrumb />
+      <CustomBreadcrumb />
       <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
         {educations.map((item: educationTypes, index) => (
           <EducationCard

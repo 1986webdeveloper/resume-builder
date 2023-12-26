@@ -6,8 +6,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 
 interface skillTypes {
   name: string;
@@ -120,7 +120,7 @@ export default function Skills() {
         title="Available Skills"
         description="Add or Edit available Skills"
       />
-      <Breadcrumb />
+      <CustomBreadcrumb />
       <div className="grid lg:grid-cols-5 md:grid-cols-4 grikd-cols-3 gap-6 mt-16">
         {allSkills.map((skill: skillTypes, index: number) => (
           <SummaryCard
