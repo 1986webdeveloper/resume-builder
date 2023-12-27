@@ -4,7 +4,6 @@ import { httpService } from "../../../services/https";
 import { Button, Label, Select } from "flowbite-react";
 import RichTextEditor from "../../shared/RichTextEditor";
 import { BsDatabaseExclamation } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
@@ -26,20 +25,16 @@ interface summaryTypes {
 }
 
 interface propTypes {
-  id: string;
   resumeId: string;
 }
 
-export default function DesignationForm({ id, resumeId }: propTypes) {
+export default function DesignationForm({ resumeId }: propTypes) {
   const {
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<Inputs>();
-
-  console.log(resumeId, "resumeId");
 
   const [allowedDesignations, setAllowedDesignations] = useState(
     [] as designationTypes[]
@@ -50,7 +45,6 @@ export default function DesignationForm({ id, resumeId }: propTypes) {
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
   const [textAreaData, setTextAreaData] = useState("");
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const currentStepId = useSelector((state: RootState) => state.currentStep.id);
@@ -100,7 +94,6 @@ export default function DesignationForm({ id, resumeId }: propTypes) {
   };
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data, textAreaData);
     if (data && textAreaData) {
       const body = {
         resumeId: resumeId,
@@ -120,12 +113,6 @@ export default function DesignationForm({ id, resumeId }: propTypes) {
                 id: res.data?.data?.currentStep?.sectionID,
               })
             );
-            // navigate(`/resume/${res.data?.data?.currentStep?.slug}`, {
-            //   state: {
-            //     id: res.data?.data?.currentStep?.sectionID,
-            //     resumeId: resumeId,
-            //   },
-            // });
           }
         })
         .catch((err) => toast.error(err?.response));

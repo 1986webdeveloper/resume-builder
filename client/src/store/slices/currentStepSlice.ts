@@ -6,8 +6,10 @@ interface stepTypes {
 }
 
 const initialState: stepTypes = {
-  value: localStorage.getItem("currentStep") || "personal",
-  id: localStorage.getItem("currentStepId") || "",
+  value:
+    JSON.parse(localStorage.getItem("currentStep") as string)?.value ||
+    "personal",
+  id: JSON.parse(localStorage.getItem("currentStep") as string)?.id || "",
 };
 
 export const currentStepSlice = createSlice({
@@ -17,6 +19,7 @@ export const currentStepSlice = createSlice({
     setCurrentStep: (state, action) => {
       state.value = action.payload.value;
       state.id = action.payload.id;
+      localStorage.setItem("currentStep", JSON.stringify(state));
     },
   },
 });

@@ -53,17 +53,11 @@ export default function DynamicStep() {
       <div className="mt-5">
         {currentStep === "personal" && <PersonalForm id={sectionId} />}
         {currentStep === "designation" && (
-          <DesignationForm id={sectionId} resumeId={resumeId} />
+          <DesignationForm resumeId={resumeId} />
         )}
-        {currentStep === "experience" && (
-          <ExperienceForm id={sectionId} resumeId={resumeId} />
-        )}
-        {currentStep === "education" && (
-          <EducationForm id={sectionId} resumeId={resumeId} />
-        )}
-        {currentStep === "skills" && (
-          <SkillsForm id={sectionId} resumeId={resumeId} />
-        )}
+        {currentStep === "experience" && <ExperienceForm resumeId={resumeId} />}
+        {currentStep === "education" && <EducationForm resumeId={resumeId} />}
+        {currentStep === "skills" && <SkillsForm resumeId={resumeId} />}
       </div>
     </div>
   );

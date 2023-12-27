@@ -18,10 +18,7 @@ export default function RichTextEditor({
       <CKEditor
         editor={ClassicEditor}
         data={defaultData}
-        onReady={(editor) => {
-          console.log("CKEditor5 React Component is ready to use!", editor);
-        }}
-        onChange={(event, editor) => {
+        onChange={(_, editor) => {
           setTextAreaData(editor.getData());
         }}
       />

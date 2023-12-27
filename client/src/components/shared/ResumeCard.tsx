@@ -26,20 +26,22 @@ export default function ResumeCard({
   onContinue,
 }: ComponentTypes) {
   return (
-    <div className="px-4 py-4 shadow-xl border border-gray-400 rounded-lg cursor-pointer">
+    <div className="px-4 py-4 shadow-xl border border-gray-400 rounded-lg cursor-pointer w-full">
       <div className="flex flex-col gap-4">
-        <div className="flex gap-6 items-center">
+        <div className="flex gap-6 items-center w-full">
           <span>
             <FaUserAlt size={60} color="gray" />
           </span>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 overflow-hidden">
             <div className="flex gap-2 items-center text-sm">
               <FaUserAlt size={10} />
               <span>{title}</span>
             </div>
-            <div className="flex gap-2 items-center text-sm">
+            <div className="flex gap-2 items-center text-sm w-full">
               <MdEmail size={10} />
-              <span>{email}</span>
+              <span className="overflow-hidden overflow-ellipsis whitespace-nowrap">
+                {email}
+              </span>
             </div>
             <div className="flex gap-2 items-center text-sm">
               <FaPhone size={10} />
@@ -51,7 +53,14 @@ export default function ResumeCard({
           <span className="text-lg font-bold">{designation}</span>
           <span className="text-xs">{summary}</span>
         </div>
-        <Button onClick={onContinue}>Continue</Button>
+        <Button
+          outline
+          className=" bg-primary"
+          color="dark"
+          onClick={onContinue}
+        >
+          Continue
+        </Button>
       </div>
     </div>
   );

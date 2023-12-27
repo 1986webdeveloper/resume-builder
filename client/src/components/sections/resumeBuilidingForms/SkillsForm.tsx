@@ -4,7 +4,6 @@ import { httpService } from "../../../services/https";
 import { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -15,15 +14,13 @@ interface skillsTypes {
 }
 
 interface propTypes {
-  id: string;
   resumeId: string;
 }
 
-export default function SkillsForm({ id, resumeId }: propTypes) {
+export default function SkillsForm({ resumeId }: propTypes) {
   const [skills, setSkills] = useState([] as skillsTypes[]);
   const [addedSkills, setAddedSkills] = useState([] as skillsTypes[]);
   const [serachStr, setSearchStr] = useState("");
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentStepId = useSelector((state: RootState) => state.currentStep.id);
 
@@ -78,7 +75,6 @@ export default function SkillsForm({ id, resumeId }: propTypes) {
         data: modified,
       };
 
-      console.log(modified);
       httpService
         .post(`resume/createUserResume`, body)
         .then((res: any) => {
@@ -89,12 +85,6 @@ export default function SkillsForm({ id, resumeId }: propTypes) {
                 id: res.data?.data?.currentStep?.sectionID,
               })
             );
-            // navigate(`/resume/${res.data?.data?.currentStep?.slug}`, {
-            //   state: {
-            //     id: res.data?.data?.currentStep?.sectionID,
-            //     resumeId: resumeId,
-            //   },
-            // });
           }
         })
         .catch((err) => toast.error(err?.response));

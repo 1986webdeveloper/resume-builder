@@ -18,6 +18,7 @@ export default function FormNav({ steps, onTabChangeFn }: propTypes) {
     <ol className="flex items-center justify-center w-fit p-3 space-x-2 text-sm font-medium text-center cursor-pointer mx-auto text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
       {steps.map((step, index) => (
         <li
+          key={index}
           className={`flex items-center ${
             activeTab === step.name ? "text-cyan-600 dark:text-cyan-500" : ""
           } `}

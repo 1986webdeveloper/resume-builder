@@ -45,7 +45,7 @@ function App() {
               element: <ResumeBuilderLayout />,
               children: [
                 { index: true, element: <ResumeBuilder /> },
-                { path: ":step", element: <DynamicStep /> },
+                { path: "build", element: <DynamicStep /> },
               ],
             },
           ],

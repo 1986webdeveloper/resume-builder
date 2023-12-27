@@ -6,7 +6,6 @@ import { FaPlusCircle, FaTrash } from "react-icons/fa";
 import { BsDatabaseExclamation } from "react-icons/bs";
 import { httpService } from "../../../services/https";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -28,7 +27,6 @@ interface summaryTypes {
 }
 
 interface propTypes {
-  id: string;
   resumeId: string;
 }
 
@@ -53,7 +51,7 @@ interface performanceTypes {
   value: string;
 }
 
-export default function EducationForm({ id, resumeId }: propTypes) {
+export default function EducationForm({ resumeId }: propTypes) {
   const {
     register,
     handleSubmit,
@@ -75,12 +73,10 @@ export default function EducationForm({ id, resumeId }: propTypes) {
   const [nextStepInfo, setNextStepInfo] = useState({} as nextStepTypes);
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentStepId = useSelector((state: RootState) => state.currentStep.id);
 
   const onAdd: SubmitHandler<Inputs> = (data) => {
-    console.log(data, textAreaData);
     reset();
     setTextAreaData("");
     if (data && textAreaData) {
@@ -135,7 +131,7 @@ export default function EducationForm({ id, resumeId }: propTypes) {
 
   const onDelete = (id: number) => {
     setEducationData((prev) =>
-      prev.filter((edu, index) => {
+      prev.filter((_, index) => {
         return index !== id;
       })
     );
@@ -150,7 +146,6 @@ export default function EducationForm({ id, resumeId }: propTypes) {
   };
 
   const getSummarySuggestions = () => {
-    console.log(selectedEducation, "selectedEdu");
     if (selectedEducation._id) {
       httpService
         .get(
@@ -176,9 +171,6 @@ export default function EducationForm({ id, resumeId }: propTypes) {
           id: nextStepInfo.id,
         })
       );
-      // navigate(nextStepInfo.route, {
-      //   state: { id: nextStepInfo.id, resumeId: resumeId },
-      // });
     }
   };
 
@@ -200,7 +192,6 @@ export default function EducationForm({ id, resumeId }: propTypes) {
   }, []);
 
   useEffect(() => {
-    console.log("education", watch("education"));
     if (watch("education")) {
       const educationDetails = educations.find(
         (education: any) => education.degreeType === watch("education")

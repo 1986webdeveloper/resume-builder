@@ -10,6 +10,7 @@ import { loginUser } from "../../services/auth/loginUser";
 import { toast } from "react-toastify";
 import { login } from "../../store/slices/authSlice";
 import { useDispatch } from "react-redux";
+import bgImg from "../../assets/bg.jpg";
 
 export default function Login() {
   type Inputs = {
@@ -115,13 +116,13 @@ export default function Login() {
       </div>
       <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
         <div
-          className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
+          className="w-full bg-center bg-no-repeat bg-cover"
           style={{
-            backgroundImage:
-              "url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')",
+            backgroundImage: `url(${bgImg})`,
           }}
         ></div>
       </div>
     </div>
   );
 }
+// url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')

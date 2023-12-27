@@ -8,6 +8,7 @@ import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
+import { BsDatabaseExclamation } from "react-icons/bs";
 
 interface skillTypes {
   name: string;
@@ -121,17 +122,31 @@ export default function Skills() {
         description="Add or Edit available Skills"
       />
       <CustomBreadcrumb />
-      <div className="grid lg:grid-cols-5 md:grid-cols-4 grikd-cols-3 gap-6 mt-16">
-        {allSkills.map((skill: skillTypes, index: number) => (
-          <SummaryCard
-            key={index}
-            summary={skill.name}
-            id={skill._id}
-            handleOpenDeleteModal={openModal}
-            handleEditModalOpen={openModal}
-          />
-        ))}
+      <div className="mt-5 px-10 py-5 h-full shadow-lg border rounded-lg max-h-[700px] overflow-auto">
+        {allSkills.length >= 1 ? (
+          <div className="grid lg:grid-cols-6 md:grid-cols-5 grikd-cols-4 gap-6 ">
+            {allSkills.map((skill: skillTypes, index: number) => (
+              <SummaryCard
+                key={index}
+                summary={skill.name}
+                id={skill._id}
+                handleOpenDeleteModal={openModal}
+                handleEditModalOpen={openModal}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="w-full min-h-[650px] flex justify-center items-center">
+            <div className="flex flex-col gap-2 items-center justify-center">
+              <BsDatabaseExclamation color="gray" size={60} />
+              <p className="text-sm text-center ml-2 text-gray-400">
+                No Skills to show.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
+
       {isOpen && modalType === "add" && (
         <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
           <AddModal handleModalClose={closeModal} modalTitle="Add Skill">

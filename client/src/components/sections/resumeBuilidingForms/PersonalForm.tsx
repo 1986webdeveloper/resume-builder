@@ -139,12 +139,6 @@ export default function PersonalForm({ id }: propTypes) {
           })
         );
         dispatch(updateFormData(res.data?.data?.previewData?.steps));
-        // navigate(`/resume/${res.data?.data?.currentStep?.slug}`, {
-        //   state: {
-        //     id: res.data?.data?.currentStep?.sectionID,
-        //     resumeId: res.data?.data?.previewData?._id,
-        //   },
-        // });
       }
     });
   };

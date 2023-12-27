@@ -33,14 +33,14 @@ export default function Card({
           <div className="flex gap-2">
             {isDeletable && (
               <span
-                className="cursor-pointer"
+                className="cursor-pointer text-remove"
                 onClick={() => handleOpenDeleteModal(id, "delete")}
               >
                 <MdDelete size={18} />
               </span>
             )}
             {isEditable && (
-              <span className="cursor-pointer">
+              <span className="cursor-pointer text-edit">
                 <MdModeEditOutline size={18} />
               </span>
             )}

@@ -6,7 +6,6 @@ import { FaPlusCircle } from "react-icons/fa";
 import { BsDatabaseExclamation } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { httpService } from "../../../services/https";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
@@ -27,7 +26,6 @@ interface summaryTypes {
 }
 
 interface propTypes {
-  id: string;
   resumeId: string;
 }
 
@@ -41,7 +39,7 @@ interface nextStepTypes {
   id: string;
 }
 
-export default function ExperienceForm({ id, resumeId }: propTypes) {
+export default function ExperienceForm({ resumeId }: propTypes) {
   const {
     register,
     handleSubmit,
@@ -64,7 +62,6 @@ export default function ExperienceForm({ id, resumeId }: propTypes) {
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
   const [nextStepInfo, setNextStepInfo] = useState({} as nextStepTypes);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentStepId = useSelector((state: RootState) => state.currentStep.id);
 
@@ -89,7 +86,6 @@ export default function ExperienceForm({ id, resumeId }: propTypes) {
   };
 
   const onAdd: SubmitHandler<Inputs> = (data) => {
-    console.log(data, textAreaData);
     reset();
     setTextAreaData("");
     if (data && textAreaData) {
@@ -115,9 +111,6 @@ export default function ExperienceForm({ id, resumeId }: propTypes) {
                 route: `/resume/${res.data?.data?.currentStep?.slug}`,
                 id: res.data?.data?.currentStep?.sectionID,
               });
-              // navigate(`/resume/${res.data?.data?.currentStep?.slug}`, {
-              //   state: { id: res.data?.data?.currentStep?.sectionID },
-              // });
             }
           })
           .catch((err) => toast.error(err?.response));
@@ -145,7 +138,7 @@ export default function ExperienceForm({ id, resumeId }: propTypes) {
 
   const onDelete = (id: number) => {
     setExperienceData((prev) =>
-      prev.filter((exp, index) => {
+      prev.filter((_, index) => {
         return index !== id;
       })
     );
@@ -164,9 +157,6 @@ export default function ExperienceForm({ id, resumeId }: propTypes) {
           id: nextStepInfo.id,
         })
       );
-      // navigate(nextStepInfo.route, {
-      //   state: { id: nextStepInfo.id, resumeId: resumeId },
-      // });
     }
   };
 
