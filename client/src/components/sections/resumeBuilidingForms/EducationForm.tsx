@@ -74,7 +74,7 @@ export default function EducationForm({ resumeId }: propTypes) {
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
   const dispatch = useDispatch();
-  const currentStepId = useSelector((state: RootState) => state.currentStep.id);
+  const currentStep = useSelector((state: RootState) => state.currentStep);
 
   const onAdd: SubmitHandler<Inputs> = (data) => {
     reset();
@@ -86,8 +86,8 @@ export default function EducationForm({ resumeId }: propTypes) {
           { ...data, summary: textAreaData },
         ]);
         const body = {
-          resumeId: resumeId,
-          step: currentStepId,
+          resumeId: currentStep.resumeId,
+          step: currentStep.sectionID,
           data: {
             ...data,
             customPerformance: { value: data.performance, label: data.label },
@@ -100,7 +100,7 @@ export default function EducationForm({ resumeId }: propTypes) {
           .then((res: any) => {
             if (res.status === 201) {
               setNextStepInfo({
-                route: `/resume/${res.data?.data?.currentStep?.slug}`,
+                route: `${res.data?.data?.currentStep?.slug}`,
                 id: res.data?.data?.currentStep?.sectionID,
               });
             }
@@ -167,8 +167,8 @@ export default function EducationForm({ resumeId }: propTypes) {
     if (nextStepInfo.route) {
       dispatch(
         setCurrentStep({
-          value: "skills",
-          id: nextStepInfo.id,
+          slug: nextStepInfo.route,
+          sectionID: nextStepInfo.id,
         })
       );
     }

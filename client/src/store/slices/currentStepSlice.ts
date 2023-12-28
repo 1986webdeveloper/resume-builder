@@ -1,15 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-interface stepTypes {
-  value: string;
-  id: string;
+interface stepsTypes {
+  sectionID: string;
+  slug: string;
+  resumeId: string;
 }
 
-const initialState: stepTypes = {
-  value:
-    JSON.parse(localStorage.getItem("currentStep") as string)?.value ||
+const initialState: stepsTypes = {
+  slug:
+    JSON.parse(localStorage.getItem("currentStep") as string)?.slug ||
     "personal",
-  id: JSON.parse(localStorage.getItem("currentStep") as string)?.id || "",
+  sectionID:
+    JSON.parse(localStorage.getItem("currentStep") as string)?.sectionID || "",
+  resumeId:
+    JSON.parse(localStorage.getItem("currentStep") as string)?.resumeId || "",
 };
 
 export const currentStepSlice = createSlice({
@@ -17,8 +21,10 @@ export const currentStepSlice = createSlice({
   initialState,
   reducers: {
     setCurrentStep: (state, action) => {
-      state.value = action.payload.value;
-      state.id = action.payload.id;
+      state.slug = action.payload?.slug;
+      state.sectionID = action.payload?.sectionID;
+      if (action.payload?.resumeId)
+        state.resumeId = action.payload?.resumeId || "";
       localStorage.setItem("currentStep", JSON.stringify(state));
     },
   },

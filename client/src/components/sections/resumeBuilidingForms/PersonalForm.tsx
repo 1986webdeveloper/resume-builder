@@ -134,11 +134,12 @@ export default function PersonalForm({ id }: propTypes) {
       if (res.status === 201) {
         dispatch(
           setCurrentStep({
-            value: res.data?.data?.currentStep?.slug,
-            id: res.data?.data?.currentStep?.sectionID,
+            slug: res.data?.data?.currentStep?.slug,
+            sectionID: res.data?.data?.currentStep?.sectionID,
+            resumeId: res.data?.data?.previewData?._id,
           })
         );
-        dispatch(updateFormData(res.data?.data?.previewData?.steps));
+        // dispatch(updateFormData(res.data?.data?.previewData?.steps));
       }
     });
   };

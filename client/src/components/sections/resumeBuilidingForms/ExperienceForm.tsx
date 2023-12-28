@@ -63,7 +63,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
   const [nextStepInfo, setNextStepInfo] = useState({} as nextStepTypes);
   const dispatch = useDispatch();
-  const currentStepId = useSelector((state: RootState) => state.currentStep.id);
+  const currentStep = useSelector((state: RootState) => state.currentStep);
 
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
@@ -95,8 +95,8 @@ export default function ExperienceForm({ resumeId }: propTypes) {
           { ...data, summary: textAreaData },
         ]);
         const body = {
-          resumeId: resumeId,
-          step: currentStepId,
+          resumeId: currentStep.resumeId,
+          step: currentStep.sectionID,
           data: {
             ...data,
             customSummary: textAreaData,
@@ -108,7 +108,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
           .then((res: any) => {
             if (res.status === 201) {
               setNextStepInfo({
-                route: `/resume/${res.data?.data?.currentStep?.slug}`,
+                route: `${res.data?.data?.currentStep?.slug}`,
                 id: res.data?.data?.currentStep?.sectionID,
               });
             }
@@ -153,8 +153,8 @@ export default function ExperienceForm({ resumeId }: propTypes) {
     if (nextStepInfo.route) {
       dispatch(
         setCurrentStep({
-          value: "education",
-          id: nextStepInfo.id,
+          slug: nextStepInfo.route,
+          sectionID: nextStepInfo.id,
         })
       );
     }

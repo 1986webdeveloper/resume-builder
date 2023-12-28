@@ -47,7 +47,7 @@ export default function DesignationForm({ resumeId }: propTypes) {
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const dispatch = useDispatch();
 
-  const currentStepId = useSelector((state: RootState) => state.currentStep.id);
+  const currentStep = useSelector((state: RootState) => state.currentStep);
 
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
@@ -96,8 +96,8 @@ export default function DesignationForm({ resumeId }: propTypes) {
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (data && textAreaData) {
       const body = {
-        resumeId: resumeId,
-        step: currentStepId,
+        resumeId: currentStep.resumeId,
+        step: currentStep.sectionID,
         data: {
           designationId: selectedDesignation?._id,
           customSummary: textAreaData,
@@ -109,8 +109,8 @@ export default function DesignationForm({ resumeId }: propTypes) {
           if (res.status === 201) {
             dispatch(
               setCurrentStep({
-                value: res.data?.data?.currentStep?.slug,
-                id: res.data?.data?.currentStep?.sectionID,
+                slug: res.data?.data?.currentStep?.slug,
+                sectionID: res.data?.data?.currentStep?.sectionID,
               })
             );
           }

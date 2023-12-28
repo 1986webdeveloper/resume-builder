@@ -22,21 +22,21 @@ export default function ResumeBuilder() {
   const navigate = useNavigate();
   const [allResume, setAllResume] = useState([]);
   const dispatch = useDispatch();
+
   const newResume = () => {
     httpService
       .get(`resume/resumeInfo`)
       .then((res: any) => {
         dispatch(
           setCurrentStep({
-            value: res.data?.data?.currentStep?.slug,
-            id: res.data?.data?.currentStep?.sectionID,
+            slug: res.data?.data?.currentStep?.slug,
+            sectionID: res.data?.data?.currentStep?.sectionID,
           })
         );
         localStorage.removeItem("currentStep");
         return navigate("build", {
           state: {
             id: res.data?.data?.currentStep?.sectionID,
-            resumeId: res.data?.data?.currentStep?._id,
           },
         });
       })
@@ -62,8 +62,9 @@ export default function ResumeBuilder() {
           );
           dispatch(
             setCurrentStep({
-              value: res.data?.data?.currentStep?.slug,
-              id: res.data?.data?.currentStep?.sectionID,
+              slug: res.data?.data?.currentStep?.slug,
+              sectionID: res.data?.data?.currentStep?.sectionID,
+              resumeId: id,
             })
           );
           navigate(`build`, {

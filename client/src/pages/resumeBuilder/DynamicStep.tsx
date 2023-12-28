@@ -8,38 +8,41 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store/store";
 import { setCurrentStep } from "../../store/slices/currentStepSlice";
 import FormNav from "../../components/shared/FormNav";
+import { httpService } from "../../services/https";
+import { useEffect, useState } from "react";
+
+interface stepsTypes {
+  sectionID: string;
+  slug: string;
+  order: number;
+}
 
 export default function DynamicStep() {
   const location = useLocation();
   const sectionId = location.state?.id;
   const resumeId = location.state?.resumeId;
   const dispatch = useDispatch();
-  const currentStep = useSelector(
-    (state: RootState) => state.currentStep.value
-  );
-  const steps = [
-    {
-      name: "personal",
-    },
-    {
-      name: "designation",
-    },
-    {
-      name: "experience",
-    },
-    {
-      name: "education",
-    },
-    {
-      name: "skills",
-    },
-    {
-      name: "preview",
-    },
-  ];
+  const currentStep = useSelector((state: RootState) => state.currentStep);
+  const [steps, setSteps] = useState([] as stepsTypes[]);
 
-  const onTabChangeFn = (step: string) => {
-    dispatch(setCurrentStep({ value: step }));
+  function sortByOrder(arr: stepsTypes[]) {
+    const sortedArray = arr.slice().sort((a, b) => a.order - b.order);
+
+    return sortedArray;
+  }
+
+  const getSteps = () => {
+    httpService.get("resume/stepInfo").then((res: any) => {
+      setSteps(sortByOrder(res.data?.data));
+    });
+  };
+
+  useEffect(() => {
+    getSteps();
+  }, []);
+
+  const onTabChangeFn = (step: stepsTypes) => {
+    dispatch(setCurrentStep(step));
   };
 
   return (
@@ -51,13 +54,17 @@ export default function DynamicStep() {
         <FormNav steps={steps} onTabChangeFn={onTabChangeFn} />
       </div>
       <div className="mt-5">
-        {currentStep === "personal" && <PersonalForm id={sectionId} />}
-        {currentStep === "designation" && (
+        {currentStep.slug === "personal" && <PersonalForm id={sectionId} />}
+        {currentStep.slug === "designation" && (
           <DesignationForm resumeId={resumeId} />
         )}
-        {currentStep === "experience" && <ExperienceForm resumeId={resumeId} />}
-        {currentStep === "education" && <EducationForm resumeId={resumeId} />}
-        {currentStep === "skills" && <SkillsForm resumeId={resumeId} />}
+        {currentStep.slug === "experience" && (
+          <ExperienceForm resumeId={resumeId} />
+        )}
+        {currentStep.slug === "education" && (
+          <EducationForm resumeId={resumeId} />
+        )}
+        {currentStep.slug === "skills" && <SkillsForm resumeId={resumeId} />}
       </div>
     </div>
   );
