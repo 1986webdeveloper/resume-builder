@@ -15,6 +15,7 @@ interface stepsTypes {
 
 export default function FormNav({ steps, onTabChangeFn }: propTypes) {
   const activeTab = useSelector((state: RootState) => state.currentStep);
+  const formData: any = useSelector((state: RootState) => state.formData);
   return (
     <ol className="flex items-center justify-center w-fit p-3 space-x-2 text-sm font-medium text-center cursor-pointer mx-auto text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
       {steps.map((step, index) => (
@@ -23,6 +24,8 @@ export default function FormNav({ steps, onTabChangeFn }: propTypes) {
           className={`flex items-center ${
             activeTab.slug === step.slug
               ? "text-cyan-600 dark:text-cyan-500"
+              : formData[step.slug]?.data
+              ? "text-green-500"
               : ""
           } `}
           onClick={() => onTabChangeFn(step)}

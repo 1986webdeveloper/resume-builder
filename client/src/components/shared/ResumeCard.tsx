@@ -1,9 +1,7 @@
 import PropTypes, { InferProps } from "prop-types";
 import { FaUserAlt } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
+import { MdDelete, MdEmail } from "react-icons/md";
 import { FaPhone } from "react-icons/fa6";
-import { FaArrowRight } from "react-icons/fa";
-import ButtonWithIcon from "./ButtonWithIcon";
 import { Button } from "flowbite-react";
 
 const ComponentPropTypes = {
@@ -13,6 +11,7 @@ const ComponentPropTypes = {
   designation: PropTypes.string,
   summary: PropTypes.string,
   onContinue: PropTypes.any,
+  onDelete: PropTypes.any,
 };
 
 type ComponentTypes = InferProps<typeof ComponentPropTypes>;
@@ -24,9 +23,16 @@ export default function ResumeCard({
   designation,
   summary,
   onContinue,
+  onDelete,
 }: ComponentTypes) {
   return (
-    <div className="px-4 py-4 shadow-xl border border-gray-400 rounded-lg cursor-pointer w-full">
+    <div className="px-4 py-4 relative shadow-xl border border-gray-400 rounded-lg cursor-pointer w-full">
+      <span
+        className="cursor-pointer text-remove absolute right-2 top-2"
+        onClick={onDelete}
+      >
+        <MdDelete size={18} />
+      </span>
       <div className="flex flex-col gap-4">
         <div className="flex gap-6 items-center w-full">
           <span>
@@ -49,9 +55,12 @@ export default function ResumeCard({
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <span className="text-lg font-bold">{designation}</span>
-          <span className="text-xs">{summary}</span>
+        <div className="flex flex-col gap-2 max-h-[150px] min-h-[150px]">
+          <span className="text-lg font-bold capitalize">{designation}</span>
+          <span
+            className="text-xs capitalize line-clamp-6 overflow-hidden"
+            dangerouslySetInnerHTML={{ __html: summary as string }}
+          />
         </div>
         <Button
           outline

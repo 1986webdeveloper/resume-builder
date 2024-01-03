@@ -124,7 +124,7 @@ export default function Skills() {
       <CustomBreadcrumb />
       <div className="mt-5 px-10 py-5 h-full shadow-lg border rounded-lg max-h-[700px] overflow-auto">
         {allSkills.length >= 1 ? (
-          <div className="grid lg:grid-cols-6 md:grid-cols-5 grikd-cols-4 gap-6 ">
+          <div className="grid lg:grid-cols-6 md:grid-cols-5 grid-cols-4 gap-6 ">
             {allSkills.map((skill: skillTypes, index: number) => (
               <SummaryCard
                 key={index}

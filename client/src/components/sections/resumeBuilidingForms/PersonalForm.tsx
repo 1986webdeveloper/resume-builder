@@ -1,22 +1,13 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
-import { Button, Datepicker, Label, Select, TextInput } from "flowbite-react";
+import { Button, Label, Select, TextInput } from "flowbite-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
 import { updateFormData } from "../../../store/slices/formDataSlice";
-
-interface Inputs {
-  full_name: string;
-  email: string;
-  country: string;
-  state: string;
-  city: string;
-  mobileNo: string;
-  address: string;
-  dob: string;
-}
+import { personalFormTypes } from "../../../types/formTypes";
+import { toast } from "react-toastify";
 
 interface countryTypes {
   name: string;
@@ -37,22 +28,46 @@ interface propTypes {
 }
 
 export default function PersonalForm({ id }: propTypes) {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.personal
+  );
+
+  const initialCountry = formData?.data
+    ? {
+        name: formData?.data[0].countries?.name,
+        code: formData?.data[0].countries?.code,
+      }
+    : {};
+  const initialState = formData?.data
+    ? {
+        name: formData?.data[0].states?.name,
+        stateCode: formData?.data[0].states?.stateCode,
+      }
+    : {};
+  const initialCity = formData?.data ? formData?.data[0]?.city : "";
   const [allCountries, setAllCountries] = useState([] as countryTypes[]);
-  const [selectedCountry, setSelectedCountry] = useState({} as countryTypes);
-  const [selectedState, setSelectedState] = useState({} as stateTypes);
+  const [selectedCountry, setSelectedCountry] = useState(
+    initialCountry as countryTypes
+  );
+  const [selectedState, setSelectedState] = useState(
+    initialState as stateTypes
+  );
   const [allStates, setAllStates] = useState([] as stateTypes[]);
   const [allCities, setAllCities] = useState([] as cityTypes[]);
   const dispatch = useDispatch();
-  const formData = useSelector((state: RootState) => state.formData.value);
+  const resumeId = useSelector(
+    (state: RootState) => state.currentStep.resumeId
+  );
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
-  } = useForm<Inputs>({
-    defaultValues: { ...formData[0]?.data[0] },
+  } = useForm<personalFormTypes>({
+    defaultValues: formData?.data ? formData?.data[0] : "",
   });
 
   const getAllCountries = () => {
@@ -92,6 +107,14 @@ export default function PersonalForm({ id }: propTypes) {
   }, []);
 
   useEffect(() => {
+    if (formData?.data) {
+      setValue("country", selectedCountry.name);
+      setValue("state", selectedState.name);
+      setValue("city", getValues("city"));
+    }
+  }, [allCountries, allStates, allCities]);
+
+  useEffect(() => {
     if (watch("country")) {
       const selectedCountryObject = allCountries.find(
         (country: countryTypes) => country.name === watch("country")
@@ -121,28 +144,79 @@ export default function PersonalForm({ id }: propTypes) {
     getAllCities();
   }, [selectedState]);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onEdit = (data: any) => {
     const body = {
-      step: id,
+      resumeId: resumeId,
+      elementId: formData?.data[0]?._id,
+      sectionId: formData?._id,
       data: {
-        ...data,
+        full_name: data.full_name,
+        email: data.email,
+        city: data.city,
+        mobileNo: data.mobileNo,
+        address: data.address,
+        dob: data.dob,
         country: selectedCountry.code,
         state: selectedState.stateCode,
       },
     };
-    httpService.post(`resume/createUserResume`, body).then((res: any) => {
-      if (res.status === 201) {
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        console.log(res, "res");
+        toast.success(res?.data?.message);
         dispatch(
-          setCurrentStep({
-            slug: res.data?.data?.currentStep?.slug,
-            sectionID: res.data?.data?.currentStep?.sectionID,
-            resumeId: res.data?.data?.previewData?._id,
+          updateFormData({
+            key: "personal",
+            value: {
+              _id: res.data?.data?.steps[0]?._id,
+              data: res.data?.data?.steps[0]?.data,
+            },
           })
         );
-        // dispatch(updateFormData(res.data?.data?.previewData?.steps));
-      }
-    });
+      })
+      .catch((err: any) => {
+        toast.error(err.message);
+      });
   };
+
+  const onSubmit: SubmitHandler<personalFormTypes> = (data) => {
+    if (formData?.data && formData?.data[0]?._id) {
+      console.log("truweee");
+      onEdit(data);
+    } else {
+      const body = {
+        step: id,
+        data: {
+          ...data,
+          country: selectedCountry.code,
+          state: selectedState.stateCode,
+        },
+      };
+      httpService.post(`resume/createUserResume`, body).then((res: any) => {
+        if (res.status === 201) {
+          dispatch(
+            setCurrentStep({
+              slug: res.data?.data?.currentStep?.slug,
+              sectionID: res.data?.data?.currentStep?.sectionID,
+              title: res.data?.data?.currentStep?.title,
+              resumeId: res.data?.data?.previewData?._id,
+            })
+          );
+          dispatch(
+            updateFormData({
+              key: "personal",
+              value: {
+                _id: res.data?.data?.previewData?.steps[0]?._id,
+                data: res.data?.data?.previewData?.steps[0]?.data,
+              },
+            })
+          );
+        }
+      });
+    }
+  };
+
   return (
     <form
       className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border"
@@ -206,12 +280,8 @@ export default function PersonalForm({ id }: propTypes) {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
-              defaultValue=""
+              defaultValue={initialCountry?.name || ""}
               color={errors?.country ? "failure" : ""}
             >
               <option value="" disabled>
@@ -234,12 +304,8 @@ export default function PersonalForm({ id }: propTypes) {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
-              defaultValue=""
+              defaultValue={initialState?.name || ""}
               color={errors?.state ? "failure" : ""}
             >
               <option value="" disabled>
@@ -264,12 +330,8 @@ export default function PersonalForm({ id }: propTypes) {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
-              defaultValue=""
+              defaultValue={initialCity}
               color={errors?.city ? "failure" : ""}
             >
               <option value="" disabled>
@@ -296,7 +358,7 @@ export default function PersonalForm({ id }: propTypes) {
                 },
               })}
               id="mobileNo"
-              type="text"
+              type="number"
               color={errors?.mobileNo ? "failure" : ""}
             />
             {errors.mobileNo?.type && (
@@ -309,29 +371,20 @@ export default function PersonalForm({ id }: propTypes) {
             <div className="mb-2 block">
               <Label htmlFor="dob" value="Date of birth" />
             </div>
-            <Datepicker
+            <input
+              type="date"
               {...register("dob", {
                 required: {
                   value: true,
                   message: "This field is required",
                 },
               })}
-              id="dob"
-              color={errors?.dob ? "failure" : ""}
-              onSelectedDateChanged={(selectedDate) => {
-                const formattedDate = new Date(selectedDate).toLocaleDateString(
-                  "en-US",
-                  {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }
-                );
-                setValue("dob", formattedDate);
-              }}
+              className={`rounded-lg w-full `}
             />
             {errors.dob?.type && (
-              <p className="text-red-600 mt-1 text-xs">{errors.dob?.message}</p>
+              <p className="text-red-600 mt-1 text-xs">
+                {errors.dob?.message as string}
+              </p>
             )}
           </div>
           <div>

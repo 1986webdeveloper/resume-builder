@@ -9,25 +9,13 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
-
-interface Inputs {
-  instituteName: string;
-  from: string;
-  to: string;
-  performance: string;
-  summary: string;
-  education: string;
-  present: boolean;
-  label: string;
-}
+import { educationFormTypes } from "../../../types/formTypes";
+import { getDesiredDataFromPreview } from "../../../services/helper";
+import { updateFormData } from "../../../store/slices/formDataSlice";
 
 interface summaryTypes {
   _id: string;
   summary: string;
-}
-
-interface propTypes {
-  resumeId: string;
 }
 
 interface educationtypes {
@@ -38,6 +26,7 @@ interface educationtypes {
 interface nextStepTypes {
   route: string;
   id: string;
+  title: string;
 }
 
 interface summaryTypes {
@@ -51,7 +40,8 @@ interface performanceTypes {
   value: string;
 }
 
-export default function EducationForm({ resumeId }: propTypes) {
+export default function EducationForm() {
+  const formData = useSelector((state: RootState) => state.formData.education);
   const {
     register,
     handleSubmit,
@@ -59,12 +49,14 @@ export default function EducationForm({ resumeId }: propTypes) {
     reset,
     watch,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<educationFormTypes | any>();
 
   const [textAreaData, setTextAreaData] = useState("");
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
   const [performances, setPerformances] = useState([] as performanceTypes[]);
-  const [educationData, setEducationData] = useState([] as Inputs[]);
+  const [educationData, setEducationData] = useState(
+    formData.data || ([] as educationFormTypes[])
+  );
   const [onEditDataId, setOnEditDataId] = useState(null as number | null);
   const [educations, setEducations] = useState([] as educationtypes[]);
   const [selectedEducation, setSelectedEducation] = useState(
@@ -76,15 +68,11 @@ export default function EducationForm({ resumeId }: propTypes) {
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
 
-  const onAdd: SubmitHandler<Inputs> = (data) => {
+  const onAdd: SubmitHandler<educationFormTypes> = (data) => {
     reset();
     setTextAreaData("");
     if (data && textAreaData) {
       if (!onEditDataId) {
-        setEducationData((prev) => [
-          ...prev,
-          { ...data, summary: textAreaData },
-        ]);
         const body = {
           resumeId: currentStep.resumeId,
           step: currentStep.sectionID,
@@ -99,42 +87,114 @@ export default function EducationForm({ resumeId }: propTypes) {
           .post(`resume/createUserResume`, body)
           .then((res: any) => {
             if (res.status === 201) {
+              const previewData = getDesiredDataFromPreview(
+                res.data?.data?.previewData?.steps,
+                currentStep.sectionID
+              );
+              setEducationData(previewData.data);
+              dispatch(
+                updateFormData({
+                  key: "education",
+                  value: previewData,
+                })
+              );
               setNextStepInfo({
                 route: `${res.data?.data?.currentStep?.slug}`,
                 id: res.data?.data?.currentStep?.sectionID,
+                title: res.data?.data?.currentStep?.title,
               });
             }
           })
           .catch((err) => toast.error(err?.response));
       } else {
-        setEducationData((prev) =>
-          prev.map((exp, index) => {
-            if (index === onEditDataId) {
+        setEducationData((prev: educationFormTypes[]) =>
+          prev.map((edu: educationFormTypes, index: number) => {
+            if (edu._id === onEditDataId) {
               return { ...data, summary: textAreaData };
             }
-            return exp;
+            return edu;
           })
         );
+        const eduObj = educations.find(
+          (edu) => edu.degreeType === data.education
+        );
+        const body = {
+          resumeId: currentStep.resumeId,
+          elementId: onEditDataId,
+          sectionId: formData?._id,
+          data: {
+            educationId: eduObj?._id,
+            instituteName: data.instituteName,
+            from: data.from,
+            to: data.to,
+            present: data.present,
+            customSummary: textAreaData,
+          },
+        };
+        httpService
+          .post(`resume/editOrDeleteUserResume`, body)
+          .then((res: any) => {
+            toast.success(res?.data?.message);
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.steps,
+              currentStep.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "education",
+                value: previewData,
+              })
+            );
+          })
+          .catch((err) => {
+            toast.error(err?.error);
+          });
         setOnEditDataId(null);
       }
     }
   };
 
-  const onEdit = (data: Inputs, id: number) => {
+  const onEdit = (data: educationFormTypes, id: number) => {
+    console.log(id, "onedit id");
     setOnEditDataId(id);
     setValue("instituteName", data.instituteName);
     setValue("from", data.from);
     setValue("to", data.to);
     setValue("performance", data.performance);
-    setTextAreaData(data.summary);
+    setTextAreaData(data.customSummary);
   };
 
   const onDelete = (id: number) => {
-    setEducationData((prev) =>
-      prev.filter((_, index) => {
-        return index !== id;
+    setEducationData((prev: educationFormTypes[]) =>
+      prev.filter((edu) => {
+        return edu._id !== id;
       })
     );
+    const body = {
+      resumeId: currentStep.resumeId,
+      elementId: id,
+      sectionId: formData?._id,
+      active: false,
+      data: {},
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        toast.success(res?.data?.message);
+        const previewData = getDesiredDataFromPreview(
+          res.data?.data?.steps,
+          currentStep.sectionID
+        );
+        dispatch(
+          updateFormData({
+            key: "education",
+            value: previewData,
+          })
+        );
+      })
+      .catch((err) => {
+        toast.error(err?.error);
+      });
   };
 
   const getEducation = () => {
@@ -169,6 +229,7 @@ export default function EducationForm({ resumeId }: propTypes) {
         setCurrentStep({
           slug: nextStepInfo.route,
           sectionID: nextStepInfo.id,
+          title: nextStepInfo.title,
         })
       );
     }
@@ -257,7 +318,7 @@ export default function EducationForm({ resumeId }: propTypes) {
             />
             {errors?.instituteName && (
               <p className="text-red-600 mt-1 text-xs">
-                {errors.instituteName?.message}
+                {errors.instituteName?.message as string}
               </p>
             )}
           </div>
@@ -277,7 +338,7 @@ export default function EducationForm({ resumeId }: propTypes) {
             />
             {errors.from?.type && (
               <p className="text-red-600 mt-1 text-xs">
-                {errors.from?.message}
+                {errors.from?.message as string}
               </p>
             )}
           </div>
@@ -298,7 +359,9 @@ export default function EducationForm({ resumeId }: propTypes) {
               disabled={isCurrentlyWorking}
             />
             {errors.to?.type && (
-              <p className="text-red-600 mt-1 text-xs">{errors.to?.message}</p>
+              <p className="text-red-600 mt-1 text-xs">
+                {errors?.to?.message as string}
+              </p>
             )}
           </div>
           <div className="flex justify-between">
@@ -323,7 +386,7 @@ export default function EducationForm({ resumeId }: propTypes) {
               />
               {errors?.performance && (
                 <p className="text-red-600 mt-1 text-xs">
-                  {errors.performance?.message}
+                  {errors.performance?.message as string}
                 </p>
               )}
             </div>
@@ -348,7 +411,7 @@ export default function EducationForm({ resumeId }: propTypes) {
               />
               {errors?.label && (
                 <p className="text-red-600 mt-1 text-xs">
-                  {errors.label?.message}
+                  {errors.label?.message as string}
                 </p>
               )}
             </div>
@@ -359,7 +422,7 @@ export default function EducationForm({ resumeId }: propTypes) {
             </div>
             <RichTextEditor
               setTextAreaData={setTextAreaData}
-              defaultData={clickedSummary.summary}
+              defaultData={textAreaData}
             />
           </div>
           <Button className="mt-2" type="submit">
@@ -414,29 +477,31 @@ export default function EducationForm({ resumeId }: propTypes) {
           </div>
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">
-          {educationData.map((education, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
-            >
-              <div className="flex items-center justify-between cursor-pointer">
-                <p
-                  className="font-lg font-bold"
-                  onClick={() => onEdit(education, index)}
-                >
-                  {education.instituteName}
-                </p>
-                <Button
-                  size="xs"
-                  color="failure"
-                  className="self-end"
-                  onClick={() => onDelete(index)}
-                >
-                  <FaTrash size={10} />
-                </Button>
+          {educationData?.map(
+            (education: educationFormTypes, index: number) => (
+              <div
+                key={index}
+                className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
+              >
+                <div className="flex items-center justify-between cursor-pointer">
+                  <p
+                    className="font-lg font-bold"
+                    onClick={() => onEdit(education, education._id)}
+                  >
+                    {education.instituteName}
+                  </p>
+                  <Button
+                    size="xs"
+                    color="failure"
+                    className="self-end"
+                    onClick={() => onDelete(education._id)}
+                  >
+                    <FaTrash size={10} />
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
     </div>

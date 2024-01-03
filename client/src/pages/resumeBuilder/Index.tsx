@@ -6,21 +6,34 @@ import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { Button } from "flowbite-react";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { setCurrentStep } from "../../store/slices/currentStepSlice";
+import {
+  clearSteps,
+  setCurrentStep,
+} from "../../store/slices/currentStepSlice";
 import { BsDatabaseExclamation } from "react-icons/bs";
+import Modal from "../../components/sections/DeleteModal";
+import { clearFormData, setFormData } from "../../store/slices/formDataSlice";
 
 interface resumeType {
   full_name: string;
   email: string;
   mobileNo: string;
-  designation: string;
+  designations: designationsTypes[];
   summary: string;
   _id: string;
+}
+
+interface designationsTypes {
+  _id: string;
+  name: string;
+  summaries: string;
 }
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
   const [allResume, setAllResume] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [openedId, setOpenedId] = useState("");
   const dispatch = useDispatch();
 
   const newResume = () => {
@@ -31,9 +44,11 @@ export default function ResumeBuilder() {
           setCurrentStep({
             slug: res.data?.data?.currentStep?.slug,
             sectionID: res.data?.data?.currentStep?.sectionID,
+            title: res.data?.data?.currentStep?.title,
           })
         );
-        localStorage.removeItem("currentStep");
+        dispatch(clearSteps());
+        dispatch(clearFormData());
         return navigate("build", {
           state: {
             id: res.data?.data?.currentStep?.sectionID,
@@ -55,24 +70,51 @@ export default function ResumeBuilder() {
     httpService
       .get(`resume/resumeInfo?resumeId=${id}`)
       .then((res: any) => {
+        dispatch(
+          setCurrentStep({
+            slug: res.data?.data?.currentStep?.slug,
+            sectionID: res.data?.data?.currentStep?.sectionID,
+            title: res.data?.data?.currentStep?.title,
+            resumeId: id,
+          })
+        );
+        // Dispatch the action of setting the filled steps's data into localstorage.
+        let previewArr = res.data?.data?.previewData?.steps?.map(
+          (preview: any) => {
+            return {
+              key: preview.slug,
+              value: { _id: preview._id, data: preview.data },
+            };
+          }
+        );
+        dispatch(setFormData(previewArr));
+        navigate(`build`, {
+          state: { id: res.data?.data?.currentStep?.sectionID, resumeId: id },
+        });
+      })
+      .catch((err) => toast.error(err.response));
+  };
+
+  const onDelete = (id: string) => {
+    const body = {
+      resumeId: id,
+      active: false,
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
         if (res.status === 200) {
-          localStorage.setItem(
-            "currentStep",
-            res.data?.data?.currentStep?.slug
-          );
-          dispatch(
-            setCurrentStep({
-              slug: res.data?.data?.currentStep?.slug,
-              sectionID: res.data?.data?.currentStep?.sectionID,
-              resumeId: id,
-            })
-          );
-          navigate(`build`, {
-            state: { id: res.data?.data?.currentStep?.sectionID, resumeId: id },
-          });
+          toast.success(res.data?.message);
+          setIsOpen(false);
+          getResumeList();
         }
       })
       .catch((err) => toast.error(err.response));
+  };
+
+  const onModalOpen = (id: string) => {
+    setIsOpen(true);
+    setOpenedId(id);
   };
 
   useEffect(() => {
@@ -103,9 +145,10 @@ export default function ResumeBuilder() {
                 title={resume.full_name}
                 email={resume.email}
                 phone={resume.mobileNo}
-                designation="FrontEnd Developer"
-                summary="Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate beatae veniam perferendis unde. Consequatur, neque ullam assumenda voluptatum nesciunt nemo architecto vel aspernatur nobis modi atque ad sequi cupiditate possimus!"
+                designation={resume?.designations[0]?.name || "To be decide"}
+                summary={resume.designations[0]?.summaries || "To be decide..."}
                 onContinue={() => onContinue(resume._id)}
+                onDelete={() => onModalOpen(resume._id)}
               />
             ))}
           </div>
@@ -120,6 +163,12 @@ export default function ResumeBuilder() {
           </div>
         )}
       </div>
+      {isOpen && (
+        <Modal
+          handleDeleteModalClose={() => setIsOpen(false)}
+          handleDelete={() => onDelete(openedId)}
+        />
+      )}
     </div>
   );
 }

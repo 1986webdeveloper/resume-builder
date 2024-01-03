@@ -10,23 +10,13 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
-
-interface Inputs {
-  companyName: string;
-  from: string;
-  to: string;
-  summary: string;
-  designation: string;
-  present: number;
-}
+import { experienceFormTypes } from "../../../types/formTypes";
+import { updateFormData } from "../../../store/slices/formDataSlice";
+import { getDesiredDataFromPreview } from "../../../services/helper";
 
 interface summaryTypes {
   _id: string;
   summary: string;
-}
-
-interface propTypes {
-  resumeId: string;
 }
 
 interface designationTypes {
@@ -37,21 +27,16 @@ interface designationTypes {
 interface nextStepTypes {
   route: string;
   id: string;
+  title: string;
 }
 
-export default function ExperienceForm({ resumeId }: propTypes) {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm<Inputs>();
-
+export default function ExperienceForm() {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.experience
+  );
   const [textAreaData, setTextAreaData] = useState("");
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
-  const [experienceData, setExperienceData] = useState([] as Inputs[]);
+  const [experienceData, setExperienceData] = useState(formData?.data || []);
   const [onEditDataId, setOnEditDataId] = useState(null as number | null);
   const [allowedDesignations, setAllowedDesignations] = useState(
     [] as designationTypes[]
@@ -65,6 +50,15 @@ export default function ExperienceForm({ resumeId }: propTypes) {
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<experienceFormTypes | any>();
+  console.log(experienceData, "expdata", formData);
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
       if (res.status === 200) {
@@ -85,15 +79,11 @@ export default function ExperienceForm({ resumeId }: propTypes) {
       });
   };
 
-  const onAdd: SubmitHandler<Inputs> = (data) => {
+  const onAdd: SubmitHandler<experienceFormTypes> = (data) => {
     reset();
     setTextAreaData("");
     if (data && textAreaData) {
       if (!onEditDataId) {
-        setExperienceData((prev) => [
-          ...prev,
-          { ...data, summary: textAreaData },
-        ]);
         const body = {
           resumeId: currentStep.resumeId,
           step: currentStep.sectionID,
@@ -107,41 +97,111 @@ export default function ExperienceForm({ resumeId }: propTypes) {
           .post(`resume/createUserResume`, body)
           .then((res: any) => {
             if (res.status === 201) {
+              const previewData = getDesiredDataFromPreview(
+                res.data?.data?.previewData?.steps,
+                currentStep.sectionID
+              );
+              setExperienceData(previewData.data);
+              dispatch(
+                updateFormData({
+                  key: "experience",
+                  value: previewData,
+                })
+              );
               setNextStepInfo({
                 route: `${res.data?.data?.currentStep?.slug}`,
                 id: res.data?.data?.currentStep?.sectionID,
+                title: res.data?.data?.currentStep?.title,
               });
             }
           })
           .catch((err) => toast.error(err?.response));
       } else {
         setExperienceData((prev) =>
-          prev.map((exp, index) => {
-            if (index === onEditDataId) {
+          prev.map((exp) => {
+            if (exp._id === onEditDataId) {
               return { ...data, summary: textAreaData };
             }
             return exp;
           })
         );
+        const body = {
+          resumeId: currentStep.resumeId,
+          elementId: onEditDataId,
+          sectionId: formData?._id,
+          data: {
+            companyName: data.companyName,
+            from: data.from,
+            to: data.to,
+            present: data.present,
+            customSummary: textAreaData,
+            experienceId: selectedDesignation._id,
+          },
+        };
+        httpService
+          .post(`resume/editOrDeleteUserResume`, body)
+          .then((res: any) => {
+            toast.success(res?.data?.message);
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.steps,
+              currentStep.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "experience",
+                value: previewData,
+              })
+            );
+          })
+          .catch((err) => {
+            toast.error(err?.message);
+          });
         setOnEditDataId(null);
       }
     }
   };
 
-  const onEdit = (data: Inputs, id: number) => {
+  const onEdit = (data: experienceFormTypes, id: number) => {
+    console.log(data, "data");
     setOnEditDataId(id);
     setValue("companyName", data.companyName);
     setValue("from", data.from);
     setValue("to", data.to);
-    setTextAreaData(data.summary);
+    setValue("designation", data.experienceData?.name);
+    setTextAreaData(data.customSummary);
   };
 
   const onDelete = (id: number) => {
-    setExperienceData((prev) =>
-      prev.filter((_, index) => {
-        return index !== id;
+    setExperienceData((prev: experienceFormTypes[]) =>
+      prev.filter((exp: any) => {
+        return exp._id !== id;
       })
     );
+    const body = {
+      resumeId: currentStep.resumeId,
+      elementId: id,
+      sectionId: formData?._id,
+      active: false,
+      data: {},
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        toast.success(res?.data?.message);
+        const previewData = getDesiredDataFromPreview(
+          res.data?.data?.steps,
+          currentStep.sectionID
+        );
+        dispatch(
+          updateFormData({
+            key: "experience",
+            value: previewData,
+          })
+        );
+      })
+      .catch((err) => {
+        toast.error(err?.error);
+      });
   };
 
   const onSummaryClick = (summary: summaryTypes) => {
@@ -153,8 +213,9 @@ export default function ExperienceForm({ resumeId }: propTypes) {
     if (nextStepInfo.route) {
       dispatch(
         setCurrentStep({
-          slug: nextStepInfo.route,
-          sectionID: nextStepInfo.id,
+          slug: nextStepInfo?.route,
+          sectionID: nextStepInfo?.id,
+          title: nextStepInfo?.title,
         })
       );
     }
@@ -215,7 +276,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
             />
             {errors?.companyName && (
               <p className="text-red-600 mt-1 text-xs">
-                {errors.companyName?.message}
+                {errors?.companyName?.message as string}
               </p>
             )}
           </div>
@@ -235,7 +296,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
             />
             {errors.from?.type && (
               <p className="text-red-600 mt-1 text-xs">
-                {errors.from?.message}
+                {errors.from?.message as string}
               </p>
             )}
           </div>
@@ -260,7 +321,9 @@ export default function ExperienceForm({ resumeId }: propTypes) {
               disabled={isCurrentlyWorking}
             />
             {errors.to?.type && (
-              <p className="text-red-600 mt-1 text-xs">{errors.to?.message}</p>
+              <p className="text-red-600 mt-1 text-xs">
+                {errors.to?.message as string}
+              </p>
             )}
           </div>
           <div>
@@ -296,7 +359,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
             </div>
             <RichTextEditor
               setTextAreaData={setTextAreaData}
-              defaultData={clickedSummary.summary}
+              defaultData={textAreaData}
             />
           </div>
           <Button className="mt-2" type="submit">
@@ -339,7 +402,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
           )}
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">
-          {experienceData.map((exp, index) => (
+          {experienceData.map((exp: any, index: number) => (
             <div
               key={index}
               className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
@@ -347,7 +410,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
               <div className="flex items-center justify-between cursor-pointer">
                 <p
                   className="font-lg font-bold"
-                  onClick={() => onEdit(exp, index)}
+                  onClick={() => onEdit(exp, exp._id)}
                 >
                   {exp.companyName}
                 </p>
@@ -355,7 +418,7 @@ export default function ExperienceForm({ resumeId }: propTypes) {
                   size="xs"
                   color="failure"
                   className="self-end"
-                  onClick={() => onDelete(index)}
+                  onClick={() => onDelete(exp._id)}
                 >
                   <FaTrash size={10} />
                 </Button>

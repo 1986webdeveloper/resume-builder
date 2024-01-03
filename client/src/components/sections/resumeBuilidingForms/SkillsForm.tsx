@@ -7,29 +7,28 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
+import { getDesiredDataFromPreview } from "../../../services/helper";
+import { updateFormData } from "../../../store/slices/formDataSlice";
 
-interface skillsTypes {
-  _id: string;
-  name: string;
-}
-
-interface propTypes {
-  resumeId: string;
-}
-
-export default function SkillsForm({ resumeId }: propTypes) {
-  const [skills, setSkills] = useState([] as skillsTypes[]);
-  const [addedSkills, setAddedSkills] = useState([] as skillsTypes[]);
+export default function SkillsForm() {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.skills
+  );
+  const currentStep = useSelector((state: RootState) => state.currentStep);
+  const [skills, setSkills] = useState([] as string[]);
+  const [addedSkills, setAddedSkills] = useState(formData?.data || []);
   const [serachStr, setSearchStr] = useState("");
   const dispatch = useDispatch();
-  const currentStep = useSelector((state: RootState) => state.currentStep);
 
   const getSkills = (query: string = "") => {
     httpService
       .get(`skills/getAllSkills?searchText=${query}`)
       .then((res: any) => {
         if (res.status === 200) {
-          setSkills(res.data?.data);
+          const modified = res.data?.data.map((data: any) => {
+            return `${data.name}`;
+          });
+          setSkills(modified);
         }
       });
   };
@@ -38,20 +37,20 @@ export default function SkillsForm({ resumeId }: propTypes) {
     getSkills();
   }, []);
 
-  const onAdd = (selectedSkill: skillsTypes) => {
+  const onAdd = (selectedSkill: string) => {
     setSkills((prev) =>
       prev.filter((skill) => {
-        return skill._id !== selectedSkill._id;
+        return skill !== selectedSkill;
       })
     );
-    setAddedSkills((prev) => [...prev, selectedSkill]);
+    setAddedSkills((prev: string[]) => [...prev, selectedSkill]);
   };
 
-  const onRemove = (selectedSkill: skillsTypes) => {
+  const onRemove = (selectedSkill: string) => {
     setSkills((prev) => [...prev, selectedSkill]);
-    setAddedSkills((prev) =>
+    setAddedSkills((prev: string[]) =>
       prev.filter((skill) => {
-        return skill._id !== selectedSkill._id;
+        return skill !== selectedSkill;
       })
     );
   };
@@ -66,28 +65,65 @@ export default function SkillsForm({ resumeId }: propTypes) {
 
   const onContinue = () => {
     if (addedSkills.length >= 1) {
-      const modified = addedSkills.map((item) => {
-        return { skill: item._id };
-      });
-      const body = {
-        resumeId: currentStep.resumeId,
-        step: currentStep.sectionID,
-        data: modified,
-      };
-
-      httpService
-        .post(`resume/createUserResume`, body)
-        .then((res: any) => {
-          if (res.status === 201) {
+      if (formData?.data) {
+        const body = {
+          resumeId: currentStep.resumeId,
+          sectionId: formData?._id,
+          active: true,
+          data: {
+            skills: addedSkills,
+          },
+        };
+        httpService
+          .post(`resume/editOrDeleteUserResume`, body)
+          .then((res: any) => {
+            toast.success(res?.data?.message);
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.steps,
+              currentStep.sectionID
+            );
             dispatch(
-              setCurrentStep({
-                slug: res.data?.data?.currentStep?.slug,
-                sectionID: res.data?.data?.currentStep?.sectionID,
+              updateFormData({
+                key: "skills",
+                value: previewData,
               })
             );
-          }
-        })
-        .catch((err) => toast.error(err?.response));
+          })
+          .catch((err) => {
+            toast.error(err?.error);
+          });
+      } else {
+        const body = {
+          resumeId: currentStep.resumeId,
+          step: currentStep.sectionID,
+          data: { skill: addedSkills },
+        };
+
+        httpService
+          .post(`resume/createUserResume`, body)
+          .then((res: any) => {
+            if (res.status === 201) {
+              const previewData = getDesiredDataFromPreview(
+                res.data?.data?.previewData?.steps,
+                currentStep.sectionID
+              );
+              dispatch(
+                updateFormData({
+                  key: "skills",
+                  value: previewData,
+                })
+              );
+              dispatch(
+                setCurrentStep({
+                  slug: res.data?.data?.currentStep?.slug,
+                  sectionID: res.data?.data?.currentStep?.sectionID,
+                  title: res.data?.data?.currentStep?.title,
+                })
+              );
+            }
+          })
+          .catch((err) => toast.error(err?.response));
+      }
     }
   };
 
@@ -114,13 +150,13 @@ export default function SkillsForm({ resumeId }: propTypes) {
           </div>
           <div>
             <div className="w-full h-full min-h-full grid lg:grid-cols-5 md:grid-cols-4 grid-cols-3 gap-3">
-              {skills?.map((skill) => (
+              {skills?.map((skill, index) => (
                 <div
-                  key={skill._id}
+                  key={index}
                   className="bg-gray-200 px-4 py-2 rounded-lg capitalize cursor-pointer"
                   onClick={() => onAdd(skill)}
                 >
-                  {skill.name}
+                  {skill}
                 </div>
               ))}
             </div>
@@ -133,12 +169,12 @@ export default function SkillsForm({ resumeId }: propTypes) {
         </div>
         <div className="min-w-[20%] max-w-[20%] min-h-[500px] max-h-[500px] px-4 py-2 overflow-y-auto rounded-lg">
           <div className="w-full h-full grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 gap-3">
-            {addedSkills?.map((skill) => (
+            {addedSkills?.map((skill: string, index: number) => (
               <div
-                key={skill._id}
+                key={index}
                 className="bg-green-100 shadow-md px-4 py-2 rounded-lg flex justify-between items-center"
               >
-                <span className="capitalize">{skill.name}</span>
+                <span className="capitalize">{skill}</span>
                 <span
                   className="p-1 cursor-pointer"
                   onClick={() => onRemove(skill)}

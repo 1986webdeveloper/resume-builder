@@ -8,11 +8,9 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
-
-interface Inputs {
-  designation: string;
-  summary: string;
-}
+import { designationFormTypes } from "../../../types/formTypes";
+import { updateFormData } from "../../../store/slices/formDataSlice";
+import { getDesiredDataFromPreview } from "../../../services/helper";
 
 interface designationTypes {
   _id: string;
@@ -24,30 +22,36 @@ interface summaryTypes {
   summary: string;
 }
 
-interface propTypes {
-  resumeId: string;
-}
-
-export default function DesignationForm({ resumeId }: propTypes) {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<Inputs>();
-
+export default function DesignationForm() {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.designation
+  );
+  const initialDesignation = formData?.data
+    ? formData?.data[0]?.designationData
+    : {};
+  const initialSummary = formData?.data ? formData?.data[0]?.customSummary : "";
   const [allowedDesignations, setAllowedDesignations] = useState(
     [] as designationTypes[]
   );
   const [selectedDesignation, setSelectedDesignation] = useState(
-    {} as designationTypes
+    initialDesignation as designationTypes
   );
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
-  const [textAreaData, setTextAreaData] = useState("");
+  const [textAreaData, setTextAreaData] = useState(initialSummary);
   const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const dispatch = useDispatch();
 
   const currentStep = useSelector((state: RootState) => state.currentStep);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<designationFormTypes>({
+    defaultValues: formData?.data ? formData?.data[0] : "",
+  });
 
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
@@ -74,6 +78,12 @@ export default function DesignationForm({ resumeId }: propTypes) {
   }, []);
 
   useEffect(() => {
+    if (formData?.data) {
+      setValue("designation", selectedDesignation?.name);
+    }
+  }, [allowedDesignations]);
+
+  useEffect(() => {
     if (watch("designation")) {
       const designationDetails = allowedDesignations.find(
         (designation: any) => designation.name === watch("designation")
@@ -93,29 +103,74 @@ export default function DesignationForm({ resumeId }: propTypes) {
     setClickedSummary(summary);
   };
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    if (data && textAreaData) {
-      const body = {
-        resumeId: currentStep.resumeId,
-        step: currentStep.sectionID,
-        data: {
-          designationId: selectedDesignation?._id,
-          customSummary: textAreaData,
-        },
-      };
-      httpService
-        .post(`resume/createUserResume`, body)
-        .then((res: any) => {
-          if (res.status === 201) {
-            dispatch(
-              setCurrentStep({
-                slug: res.data?.data?.currentStep?.slug,
-                sectionID: res.data?.data?.currentStep?.sectionID,
-              })
-            );
-          }
-        })
-        .catch((err) => toast.error(err?.response));
+  const onEdit = () => {
+    const body = {
+      resumeId: currentStep.resumeId,
+      elementId: formData?.data[0]?._id,
+      sectionId: formData?._id,
+      data: {
+        designationId: selectedDesignation?._id,
+        customSummary: textAreaData,
+      },
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        toast.success(res?.data?.message);
+        const previewData = getDesiredDataFromPreview(
+          res.data?.data?.steps,
+          currentStep.sectionID
+        );
+        dispatch(
+          updateFormData({
+            key: "designation",
+            value: previewData,
+          })
+        );
+      })
+      .catch((err: any) => {
+        toast.error(err.message);
+      });
+  };
+
+  const onSubmit: SubmitHandler<designationFormTypes> = (data) => {
+    if (formData?.data && formData?.data[0]?._id) {
+      onEdit();
+    } else {
+      if (data && textAreaData) {
+        const body = {
+          resumeId: currentStep.resumeId,
+          step: currentStep.sectionID,
+          data: {
+            designationId: selectedDesignation?._id,
+            customSummary: textAreaData,
+          },
+        };
+        httpService
+          .post(`resume/createUserResume`, body)
+          .then((res: any) => {
+            if (res.status === 201) {
+              const previewData = getDesiredDataFromPreview(
+                res.data?.data?.previewData?.steps,
+                currentStep.sectionID
+              );
+              dispatch(
+                updateFormData({
+                  key: "designation",
+                  value: previewData,
+                })
+              );
+              dispatch(
+                setCurrentStep({
+                  slug: res.data?.data?.currentStep?.slug,
+                  sectionID: res.data?.data?.currentStep?.sectionID,
+                  title: res.data?.data?.currentStep?.title,
+                })
+              );
+            }
+          })
+          .catch((err) => toast.error(err?.response));
+      }
     }
   };
   return (
@@ -157,7 +212,7 @@ export default function DesignationForm({ resumeId }: propTypes) {
           </div>
           <RichTextEditor
             setTextAreaData={setTextAreaData}
-            defaultData={clickedSummary.summary}
+            defaultData={textAreaData}
           />
         </div>
         <Button color="success" type="submit" className="px-10 mt-9 mx-auto">

@@ -10,24 +10,24 @@ import { setCurrentStep } from "../../store/slices/currentStepSlice";
 import FormNav from "../../components/shared/FormNav";
 import { httpService } from "../../services/https";
 import { useEffect, useState } from "react";
+import Preview from "../../components/sections/preview/Preview";
 
 interface stepsTypes {
   sectionID: string;
   slug: string;
   order: number;
+  title: string;
 }
 
 export default function DynamicStep() {
   const location = useLocation();
   const sectionId = location.state?.id;
-  const resumeId = location.state?.resumeId;
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
   const [steps, setSteps] = useState([] as stepsTypes[]);
 
   function sortByOrder(arr: stepsTypes[]) {
     const sortedArray = arr.slice().sort((a, b) => a.order - b.order);
-
     return sortedArray;
   }
 
@@ -42,30 +42,29 @@ export default function DynamicStep() {
   }, []);
 
   const onTabChangeFn = (step: stepsTypes) => {
-    dispatch(setCurrentStep(step));
+    dispatch(setCurrentStep({ ...step }));
   };
 
   return (
     <div>
       <div className="w-full mt-3 relative">
-        <h1 className="font-bold text-3xl text-center">Current Step {}</h1>
+        <h1 className="font-bold text-3xl text-center capitalize">
+          {currentStep?.title}
+        </h1>
       </div>
       <div className="mt-5 w-full">
         <FormNav steps={steps} onTabChangeFn={onTabChangeFn} />
       </div>
-      <div className="mt-5">
-        {currentStep.slug === "personal" && <PersonalForm id={sectionId} />}
-        {currentStep.slug === "designation" && (
-          <DesignationForm resumeId={resumeId} />
-        )}
-        {currentStep.slug === "experience" && (
-          <ExperienceForm resumeId={resumeId} />
-        )}
-        {currentStep.slug === "education" && (
-          <EducationForm resumeId={resumeId} />
-        )}
-        {currentStep.slug === "skills" && <SkillsForm resumeId={resumeId} />}
-      </div>
+      {steps && (
+        <div className="mt-5">
+          {currentStep.slug === "personal" && <PersonalForm id={sectionId} />}
+          {currentStep.slug === "designation" && <DesignationForm />}
+          {currentStep.slug === "experience" && <ExperienceForm />}
+          {currentStep.slug === "education" && <EducationForm />}
+          {currentStep.slug === "skills" && <SkillsForm />}
+          {currentStep.slug === "preview" && <Preview steps={steps} />}
+        </div>
+      )}
     </div>
   );
 }
