@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import EducationCard from "../../components/shared/EducationCard";
 import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
@@ -9,6 +8,8 @@ import RichTextEditor from "../../components/shared/RichTextEditor";
 import { toast } from "react-toastify";
 import { httpService } from "../../services/https";
 import Modal from "../../components/sections/DeleteModal";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
+import { BsDatabaseExclamation } from "react-icons/bs";
 
 interface educationTypes {
   _id: string;
@@ -114,16 +115,29 @@ export default function Education() {
         title="Available Education"
         description="Add or Edit available Education"
       />
-      <Breadcrumb />
-      <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
-        {educations.map((item: educationTypes, index) => (
-          <EducationCard
-            key={index}
-            id={item._id}
-            title={item?.degreeType}
-            handleOpenDeleteModal={openModal}
-          />
-        ))}
+      <CustomBreadcrumb />
+      <div>
+        {educations.length >= 1 ? (
+          <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
+            {educations.map((item: educationTypes, index) => (
+              <EducationCard
+                key={index}
+                id={item._id}
+                title={item?.degreeType}
+                handleOpenDeleteModal={openModal}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="w-full min-h-[650px] flex justify-center items-center">
+            <div className="flex flex-col gap-2 items-center justify-center">
+              <BsDatabaseExclamation color="gray" size={60} />
+              <p className="text-sm text-center ml-2 text-gray-400">
+                No Educations to show.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {isOpen && modalType === "add" && (

@@ -28,13 +28,13 @@ export default function SummaryCard({
         />
         <div className="flex gap-2 ">
           <span
-            className="cursor-pointer"
+            className="cursor-pointer text-remove"
             onClick={() => handleOpenDeleteModal(id, summary, "delete")}
           >
             <MdDelete size={18} />
           </span>
           <span
-            className="cursor-pointer"
+            className="cursor-pointer text-edit"
             onClick={() => handleEditModalOpen(id, summary, "edit")}
           >
             <MdModeEditOutline size={18} />

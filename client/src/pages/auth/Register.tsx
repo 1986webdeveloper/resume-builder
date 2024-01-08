@@ -8,6 +8,7 @@ import { fieldTypes } from "../../types/fieldTypes";
 import { useState } from "react";
 import { registerUser } from "../../services/auth/registerUser";
 import { toast } from "react-toastify";
+import bgImg from "../../assets/bg.jpg";
 
 export default function Register() {
   interface Inputs {
@@ -100,12 +101,18 @@ export default function Register() {
       </div>
       <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
         <div
+          className="w-full bg-center bg-no-repeat bg-cover"
+          style={{
+            backgroundImage: `url(${bgImg})`,
+          }}
+        ></div>
+        {/* <div
           className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
           style={{
             backgroundImage:
               "url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')",
           }}
-        ></div>
+        ></div> */}
       </div>
     </div>
   );

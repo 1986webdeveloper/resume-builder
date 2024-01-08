@@ -7,8 +7,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
+import { BsDatabaseExclamation } from "react-icons/bs";
 
 export default function Designations() {
   interface designationType {
@@ -122,24 +123,36 @@ export default function Designations() {
         title="Choose Designation"
         description="Select the designation which you want to modify."
       />
-      <Breadcrumb />
-
+      <CustomBreadcrumb />
       {isLoading ? (
         <div className="font-bold text-xl">Loading...</div>
       ) : (
-        <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
-          {availableDesignations.map((designation, index) => (
-            <Card
-              key={index}
-              id={designation._id}
-              title={designation.name}
-              description="We've designed and built ecommerce experiences that have
-                driven sales."
-              route={designation.name}
-              handleOpenDeleteModal={openModal}
-              isEditable={false}
-            />
-          ))}
+        <div>
+          {availableDesignations.length >= 1 ? (
+            <div className="grid lg:grid-cols-4 md:grid-cols-3 grikd-cols-2 gap-6 mt-16">
+              {availableDesignations.map((designation, index) => (
+                <Card
+                  key={index}
+                  id={designation._id}
+                  title={designation.name}
+                  description="We've designed and built ecommerce experiences that have
+                    driven sales."
+                  route={designation.name}
+                  handleOpenDeleteModal={openModal}
+                  isEditable={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="w-full min-h-[650px] flex justify-center items-center">
+              <div className="flex flex-col gap-2 items-center justify-center">
+                <BsDatabaseExclamation color="gray" size={60} />
+                <p className="text-sm text-center ml-2 text-gray-400">
+                  No Designations to show.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

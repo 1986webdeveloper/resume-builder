@@ -1,20 +1,13 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
-import { Button, Datepicker, Label, Select, TextInput } from "flowbite-react";
-import ButtonWithIcon from "../../shared/ButtonWithIcon";
-import { FaUserPlus } from "react-icons/fa6";
-
-interface Inputs {
-  full_name: string;
-  email: string;
-  country: string;
-  state: string;
-  city: string;
-  mobileNo: string;
-  address: string;
-  dob: string;
-}
+import { Button, Label, Select, TextInput } from "flowbite-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentStep } from "../../../store/slices/currentStepSlice";
+import { RootState } from "../../../store/store";
+import { updateFormData } from "../../../store/slices/formDataSlice";
+import { personalFormTypes } from "../../../types/formTypes";
+import { toast } from "react-toastify";
 
 interface countryTypes {
   name: string;
@@ -30,20 +23,52 @@ interface cityTypes {
   name: string;
 }
 
-export default function PersonalForm() {
+interface propTypes {
+  id: string;
+}
+
+export default function PersonalForm({ id }: propTypes) {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.personal
+  );
+
+  const initialCountry = formData?.data
+    ? {
+        name: formData?.data[0].countries?.name,
+        code: formData?.data[0].countries?.code,
+      }
+    : {};
+  const initialState = formData?.data
+    ? {
+        name: formData?.data[0].states?.name,
+        stateCode: formData?.data[0].states?.stateCode,
+      }
+    : {};
+  const initialCity = formData?.data ? formData?.data[0]?.city : "";
   const [allCountries, setAllCountries] = useState([] as countryTypes[]);
-  const [selectedCountry, setSelectedCountry] = useState({} as countryTypes);
-  const [selectedState, setSelectedState] = useState({} as stateTypes);
+  const [selectedCountry, setSelectedCountry] = useState(
+    initialCountry as countryTypes
+  );
+  const [selectedState, setSelectedState] = useState(
+    initialState as stateTypes
+  );
   const [allStates, setAllStates] = useState([] as stateTypes[]);
   const [allCities, setAllCities] = useState([] as cityTypes[]);
+  const dispatch = useDispatch();
+  const resumeId = useSelector(
+    (state: RootState) => state.currentStep.resumeId
+  );
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<personalFormTypes>({
+    defaultValues: formData?.data ? formData?.data[0] : "",
+  });
 
   const getAllCountries = () => {
     httpService.get(`helper/getAllCounties`).then((res: any) => {
@@ -54,30 +79,40 @@ export default function PersonalForm() {
   };
 
   const getAllStates = () => {
-    httpService
-      .get(`helper/getAllState?countryCode=${selectedCountry.code}`)
-      .then((res: any) => {
-        if (res.status === 200) {
-          setAllStates(res.data?.data);
-        }
-      });
+    if (selectedCountry?.code)
+      httpService
+        .get(`helper/getAllState?countryCode=${selectedCountry.code}`)
+        .then((res: any) => {
+          if (res.status === 200) {
+            setAllStates(res.data?.data);
+          }
+        });
   };
 
   const getAllCities = () => {
-    httpService
-      .get(
-        `helper/getAllCities?countryCode=${selectedCountry.code}&stateCode=${selectedState.stateCode}`
-      )
-      .then((res: any) => {
-        if (res.status === 200) {
-          setAllCities(res.data?.data);
-        }
-      });
+    if (selectedCountry?.code && selectedState?.stateCode)
+      httpService
+        .get(
+          `helper/getAllCities?countryCode=${selectedCountry.code}&stateCode=${selectedState.stateCode}`
+        )
+        .then((res: any) => {
+          if (res.status === 200) {
+            setAllCities(res.data?.data);
+          }
+        });
   };
 
   useEffect(() => {
     getAllCountries();
   }, []);
+
+  useEffect(() => {
+    if (formData?.data) {
+      setValue("country", selectedCountry.name);
+      setValue("state", selectedState.name);
+      setValue("city", getValues("city"));
+    }
+  }, [allCountries, allStates, allCities]);
 
   useEffect(() => {
     if (watch("country")) {
@@ -109,12 +144,82 @@ export default function PersonalForm() {
     getAllCities();
   }, [selectedState]);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
+  const onEdit = (data: any) => {
+    const body = {
+      resumeId: resumeId,
+      elementId: formData?.data[0]?._id,
+      sectionId: formData?._id,
+      data: {
+        full_name: data.full_name,
+        email: data.email,
+        city: data.city,
+        mobileNo: data.mobileNo,
+        address: data.address,
+        dob: data.dob,
+        country: selectedCountry.code,
+        state: selectedState.stateCode,
+      },
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        console.log(res, "res");
+        toast.success(res?.data?.message);
+        dispatch(
+          updateFormData({
+            key: "personal",
+            value: {
+              _id: res.data?.data?.steps[0]?._id,
+              data: res.data?.data?.steps[0]?.data,
+            },
+          })
+        );
+      })
+      .catch((err: any) => {
+        toast.error(err.message);
+      });
   };
+
+  const onSubmit: SubmitHandler<personalFormTypes> = (data) => {
+    if (formData?.data && formData?.data[0]?._id) {
+      console.log("truweee");
+      onEdit(data);
+    } else {
+      const body = {
+        step: id,
+        data: {
+          ...data,
+          country: selectedCountry.code,
+          state: selectedState.stateCode,
+        },
+      };
+      httpService.post(`resume/createUserResume`, body).then((res: any) => {
+        if (res.status === 201) {
+          dispatch(
+            setCurrentStep({
+              slug: res.data?.data?.currentStep?.slug,
+              sectionID: res.data?.data?.currentStep?.sectionID,
+              title: res.data?.data?.currentStep?.title,
+              resumeId: res.data?.data?.previewData?._id,
+            })
+          );
+          dispatch(
+            updateFormData({
+              key: "personal",
+              value: {
+                _id: res.data?.data?.previewData?.steps[0]?._id,
+                data: res.data?.data?.previewData?.steps[0]?.data,
+              },
+            })
+          );
+        }
+      });
+    }
+  };
+
   return (
     <form
-      className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border self-center justify-center"
+      className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex gap-5 w-full">
@@ -175,13 +280,13 @@ export default function PersonalForm() {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
+              defaultValue={initialCountry?.name || ""}
               color={errors?.country ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select Country
+              </option>
               {allCountries.map((country: countryTypes) => (
                 <option key={country.name}>{country.name}</option>
               ))}
@@ -199,13 +304,13 @@ export default function PersonalForm() {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
+              defaultValue={initialState?.name || ""}
               color={errors?.state ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select State
+              </option>
               {allStates.map((state: stateTypes) => (
                 <option key={state.name}>{state.name}</option>
               ))}
@@ -225,13 +330,13 @@ export default function PersonalForm() {
                   value: true,
                   message: "This field is required",
                 },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
               })}
+              defaultValue={initialCity}
               color={errors?.city ? "failure" : ""}
             >
+              <option value="" disabled>
+                Select City
+              </option>
               {allCities.map((city) => (
                 <option key={city.name}>{city.name}</option>
               ))}
@@ -253,8 +358,7 @@ export default function PersonalForm() {
                 },
               })}
               id="mobileNo"
-              type="text"
-              placeholder="name@flowbite.com"
+              type="number"
               color={errors?.mobileNo ? "failure" : ""}
             />
             {errors.mobileNo?.type && (
@@ -267,34 +371,25 @@ export default function PersonalForm() {
             <div className="mb-2 block">
               <Label htmlFor="dob" value="Date of birth" />
             </div>
-            <Datepicker
+            <input
+              type="date"
               {...register("dob", {
                 required: {
                   value: true,
                   message: "This field is required",
                 },
               })}
-              id="dob"
-              color={errors?.dob ? "failure" : ""}
-              onSelectedDateChanged={(selectedDate) => {
-                const formattedDate = new Date(selectedDate).toLocaleDateString(
-                  "en-US",
-                  {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }
-                );
-                setValue("dob", formattedDate);
-              }}
+              className={`rounded-lg w-full `}
             />
             {errors.dob?.type && (
-              <p className="text-red-600 mt-1 text-xs">{errors.dob?.message}</p>
+              <p className="text-red-600 mt-1 text-xs">
+                {errors.dob?.message as string}
+              </p>
             )}
           </div>
           <div>
             <div className="mb-2 block">
-              <Label htmlFor="mobileNo" value="Address" />
+              <Label htmlFor="address" value="Address" />
             </div>
             <TextInput
               {...register("address", {
@@ -319,11 +414,9 @@ export default function PersonalForm() {
           </div>
         </div>
       </div>
-      <ButtonWithIcon
-        label="Continue"
-        icon={<FaUserPlus size={20} />}
-        color="bg-primary"
-      />
+      <Button type="submit" color="success" className="px-10 mt-9 mx-auto">
+        Continue
+      </Button>
     </form>
   );
 }

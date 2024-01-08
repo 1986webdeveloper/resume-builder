@@ -6,8 +6,9 @@ import RichTextEditor from "../../components/shared/RichTextEditor";
 import { toast } from "react-toastify";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
-import Breadcrumb from "../../components/shared/Breadcrumb";
 import { httpService } from "../../services/https";
+import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
+import { BsDatabaseExclamation } from "react-icons/bs";
 
 type summarytypes = {
   _id: string;
@@ -130,17 +131,30 @@ export default function AvailableFields() {
         title="All Summaries"
         description="Add or Edit available summaries."
       />
-      <Breadcrumb />
-      <div className="flex flex-col gap-5 w-full">
-        {availableSummaries.map((item: summarytypes) => (
-          <SummaryCard
-            key={item._id}
-            summary={item.summary}
-            id={item._id}
-            handleOpenDeleteModal={openModal}
-            handleEditModalOpen={openModal}
-          />
-        ))}
+      <CustomBreadcrumb />
+      <div className="mt-5 px-8 py-5 h-full shadow-lg border rounded-lg max-h-[700px] overflow-auto">
+        {availableSummaries.length >= 1 ? (
+          <div className="flex flex-col gap-5 w-full">
+            {availableSummaries.map((item: summarytypes) => (
+              <SummaryCard
+                key={item._id}
+                summary={item.summary}
+                id={item._id}
+                handleOpenDeleteModal={openModal}
+                handleEditModalOpen={openModal}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="w-full min-h-[650px] flex justify-center items-center">
+            <div className="flex flex-col gap-2 items-center justify-center">
+              <BsDatabaseExclamation color="gray" size={60} />
+              <p className="text-sm text-center ml-2 text-gray-400">
+                No Summaries to show.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {isOpen && modalType === "add" && (

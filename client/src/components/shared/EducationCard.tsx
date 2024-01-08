@@ -22,7 +22,7 @@ export default function EducationCard({
           <h1 className="font-bold text-lg capitalize">{title}</h1>
         </NavLink>
         <span
-          className="cursor-pointer"
+          className="cursor-pointer text-remove"
           onClick={() => handleOpenDeleteModal(id, "delete")}
         >
           <MdDelete size={18} />

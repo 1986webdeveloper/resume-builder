@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
-import ButtonWithIcon from "../../shared/ButtonWithIcon";
-import { FaUserPlus } from "react-icons/fa6";
-import { Label, Select } from "flowbite-react";
+import { Button, Label, Select } from "flowbite-react";
 import RichTextEditor from "../../shared/RichTextEditor";
 import { BsDatabaseExclamation } from "react-icons/bs";
-
-interface Inputs {
-  designation: string;
-  summary: string;
-}
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentStep } from "../../../store/slices/currentStepSlice";
+import { RootState } from "../../../store/store";
+import { designationFormTypes } from "../../../types/formTypes";
+import { updateFormData } from "../../../store/slices/formDataSlice";
+import { getDesiredDataFromPreview } from "../../../services/helper";
 
 interface designationTypes {
   _id: string;
@@ -23,24 +23,38 @@ interface summaryTypes {
 }
 
 export default function DesignationForm() {
+  const formData: any = useSelector(
+    (state: RootState) => state.formData.designation
+  );
+  const initialDesignation = formData?.data
+    ? formData?.data[0]?.designationData
+    : {};
+  const initialSummary = formData?.data ? formData?.data[0]?.customSummary : "";
+  const [allowedDesignations, setAllowedDesignations] = useState(
+    [] as designationTypes[]
+  );
+  const [selectedDesignation, setSelectedDesignation] = useState(
+    initialDesignation as designationTypes
+  );
+  const [summaries, setSummaries] = useState([] as summaryTypes[]);
+  const [textAreaData, setTextAreaData] = useState(initialSummary);
+  const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
+  const dispatch = useDispatch();
+
+  const currentStep = useSelector((state: RootState) => state.currentStep);
+
   const {
     register,
     handleSubmit,
     watch,
     setValue,
     formState: { errors },
-  } = useForm<Inputs>();
-
-  const [allowedDesignations, setAllowedDesignations] = useState([]);
-  const [selectedDesignation, setSelectedDesignation] = useState(
-    {} as designationTypes
-  );
-  const [summaries, setSummaries] = useState([] as summaryTypes[]);
-  const [textAreaData, setTextAreaData] = useState("");
-  const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
+  } = useForm<designationFormTypes>({
+    defaultValues: formData?.data ? formData?.data[0] : "",
+  });
 
   const getAllowedDesignations = () => {
-    httpService.get(`admin/getAllowedDesignation`).then((res: any) => {
+    httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
       if (res.status === 200) {
         setAllowedDesignations(res?.data?.data);
       }
@@ -64,11 +78,14 @@ export default function DesignationForm() {
   }, []);
 
   useEffect(() => {
+    if (formData?.data) {
+      setValue("designation", selectedDesignation?.name);
+    }
+  }, [allowedDesignations]);
+
+  useEffect(() => {
     if (watch("designation")) {
-      const designations = JSON.parse(
-        localStorage.getItem("designations") as string
-      );
-      const designationDetails = designations.find(
+      const designationDetails = allowedDesignations.find(
         (designation: any) => designation.name === watch("designation")
       );
       if (designationDetails) {
@@ -78,7 +95,7 @@ export default function DesignationForm() {
   }, [watch("designation")]);
 
   useEffect(() => {
-    if (selectedDesignation) getSummarySuggestions();
+    if (selectedDesignation?._id) getSummarySuggestions();
   }, [selectedDesignation]);
 
   const onSummaryClick = (summary: summaryTypes) => {
@@ -86,11 +103,78 @@ export default function DesignationForm() {
     setClickedSummary(summary);
   };
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
+  const onEdit = () => {
+    const body = {
+      resumeId: currentStep.resumeId,
+      elementId: formData?.data[0]?._id,
+      sectionId: formData?._id,
+      data: {
+        designationId: selectedDesignation?._id,
+        customSummary: textAreaData,
+      },
+    };
+    httpService
+      .post(`resume/editOrDeleteUserResume`, body)
+      .then((res: any) => {
+        toast.success(res?.data?.message);
+        const previewData = getDesiredDataFromPreview(
+          res.data?.data?.steps,
+          currentStep.sectionID
+        );
+        dispatch(
+          updateFormData({
+            key: "designation",
+            value: previewData,
+          })
+        );
+      })
+      .catch((err: any) => {
+        toast.error(err.message);
+      });
+  };
+
+  const onSubmit: SubmitHandler<designationFormTypes> = (data) => {
+    if (formData?.data && formData?.data[0]?._id) {
+      onEdit();
+    } else {
+      if (data && textAreaData) {
+        const body = {
+          resumeId: currentStep.resumeId,
+          step: currentStep.sectionID,
+          data: {
+            designationId: selectedDesignation?._id,
+            customSummary: textAreaData,
+          },
+        };
+        httpService
+          .post(`resume/createUserResume`, body)
+          .then((res: any) => {
+            if (res.status === 201) {
+              const previewData = getDesiredDataFromPreview(
+                res.data?.data?.previewData?.steps,
+                currentStep.sectionID
+              );
+              dispatch(
+                updateFormData({
+                  key: "designation",
+                  value: previewData,
+                })
+              );
+              dispatch(
+                setCurrentStep({
+                  slug: res.data?.data?.currentStep?.slug,
+                  sectionID: res.data?.data?.currentStep?.sectionID,
+                  title: res.data?.data?.currentStep?.title,
+                })
+              );
+            }
+          })
+          .catch((err) => toast.error(err?.response));
+      }
+    }
   };
   return (
-    <div className="flex justify-between mt-10 w-full">
+    <div className="flex gap-10 mt-10 w-full">
       <form
         className="min-w-[25%] max-w-[26%] shadow-xl px-6 py-8 rounded-lg border self-center justify-center"
         onSubmit={handleSubmit(onSubmit)}
@@ -101,7 +185,7 @@ export default function DesignationForm() {
           </div>
           <Select
             id="designation"
-            defaultValue="Select Designation"
+            defaultValue=""
             {...register("designation", {
               required: {
                 value: true,
@@ -117,8 +201,8 @@ export default function DesignationForm() {
             <option value="" disabled>
               Select Designation
             </option>
-            {allowedDesignations.map((designationName, index) => (
-              <option key={index}>{designationName}</option>
+            {allowedDesignations.map((designation, index) => (
+              <option key={index}>{designation.name}</option>
             ))}
           </Select>
         </div>
@@ -128,16 +212,14 @@ export default function DesignationForm() {
           </div>
           <RichTextEditor
             setTextAreaData={setTextAreaData}
-            defaultData={clickedSummary.summary}
+            defaultData={textAreaData}
           />
         </div>
-        <ButtonWithIcon
-          label="Continue"
-          icon={<FaUserPlus size={20} />}
-          color="bg-primary"
-        />
+        <Button color="success" type="submit" className="px-10 mt-9 mx-auto">
+          Continue
+        </Button>
       </form>
-      <div className="min-w-[70%] max-w-[71%] min-h-[200px] max-h-[500px] overflow-y-auto shadow-xl border px-4 py-8 rounded-lg">
+      <div className="min-w-[50%] max-w-[51%] min-h-[200px] max-h-[500px] overflow-y-auto shadow-xl border px-4 py-8 rounded-lg">
         {summaries.length >= 1 ? (
           <div className="flex flex-col gap-3">
             {summaries.map((summary) => (
