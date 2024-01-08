@@ -57,6 +57,7 @@ export const userResumeService = new class {
 
     }
     //#endregion
+
     //#region  findData
     async getResumeData({ filter, attributes = [], projection = {}, sort = {} }:
         { filter: any; attributes?: [] | string[]; projection?: any, sort: any }) {
@@ -65,10 +66,17 @@ export const userResumeService = new class {
     //#endregion
 
     //#region  findData
-    async testGetResumeData(filter: any) {
-        return await UserResumeModel.findOne(filter).lean()
+    async getResumeSchemaData(filter: any, attributes: any = [], projection: any = {}, sort: any = {}) {
+        return await ResumeSchemaModel.find(filter, projection).select(attributes).sort(sort)
     }
     //#endregion
+
+    //#region  findData
+    async getResumeSchema(filter: any, attributes: any = [], projection: any = {}, sort: any = {}) {
+        return await ResumeSchemaModel.findOne(filter, projection).select(attributes).sort(sort)
+    }
+    //#endregion
+
 
 
     //#region check step and create 
@@ -76,7 +84,10 @@ export const userResumeService = new class {
         resumeId: any = null,
         userId: Types.ObjectId | null = null, sectionData: any) {
         let newData
-        if (data?.length) data._id = new Types.ObjectId()
+        if (!Array.isArray(data)) {
+            data._id = new Types.ObjectId()
+            data.is_active = ACTIVE
+        }
         if (sectionData.order == 1) {
             const createData = {
                 steps: [{
@@ -123,7 +134,7 @@ export const userResumeService = new class {
                     $push: {
                         steps: {
                             step,
-                            data: step == RESUME_STEP.skill ? data : [data]
+                            data: Array.isArray(data) ? data : [data]
                         }
                     },
                     currentStep: step
@@ -159,11 +170,14 @@ export const userResumeService = new class {
     //#region  check user resume current step
     async checkUsercurrentStep(resumeData: any) {
 
-        let resumeId = resumeData._id
+        let resumeId = resumeData?._id ?? resumeData.resumeId
         let download = resumeData?.download
+        let preview = resumeData?.preview
         let finalResponse: any = {}
         if (resumeId) {
             resumeId = new Types.ObjectId(resumeId)
+
+
             const pipeline: any = [
                 { $match: { "_id": resumeId } },
                 {
@@ -173,250 +187,307 @@ export const userResumeService = new class {
                     $unwind: '$steps.data'
                 },
                 {
-                    $lookup: {
-                        from: ModelName.counties,
-                        localField: 'steps.data.country',
-                        foreignField: 'code',
-                        as: 'steps.data.countries',
-                        pipeline: [{
-                            $project: {
-                                name: 1,
-                                code: 1
-                            }
-                        }]
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$steps.data.countries',
-                        preserveNullAndEmptyArrays: true
-                    },
-                },
-                {
-                    $lookup: {
-
-                        from: ModelName.states,
-                        let: { 'countryCode_': '$steps.data.countries.code' },
-                        localField: 'steps.data.state',
-                        foreignField: 'stateCode',
-                        as: 'steps.data.states',
-                        pipeline: [
+                    $facet: {
+                        jsonArray: [
+                            // // Pipeline for handling array of JSON objects
                             {
                                 $match: {
-                                    $expr: {
-                                        $eq: ['$countryCode', '$$countryCode_']
-                                    }
+                                    // "steps.step": { $ne: "#MhHm3ou9T1" }
+                                    'steps.data':
+                                        { $type: "object" }
                                 }
                             },
                             {
-                                $project: {
-                                    name: 1,
-                                    stateCode: 1,
-                                    countryCode: 1
+                                $lookup: {
+                                    from: ModelName.counties,
+                                    localField: 'steps.data.country',
+                                    foreignField: 'code',
+                                    as: 'steps.data.countries',
+                                    pipeline: [{
+                                        $project: {
+                                            name: 1,
+                                            code: 1
+                                        }
+                                    }]
                                 }
-                            }]
-                    }
-                },
-                //designation lookup
-                {
-                    $lookup: {
-                        from: ModelName.designationModel,
-                        localField: 'steps.data.designationId',
-                        let: {
-                            summaryId: '$steps.data.designationSummaryId',
-                        },
-                        foreignField: '_id',
-                        as: 'steps.data.designationData',
-                        pipeline: [
+                            },
                             {
-                                $project: {
-                                    name: 1,
-                                    summaries: 1
+                                $unwind: {
+                                    path: '$steps.data.countries',
+                                    preserveNullAndEmptyArrays: true
+                                },
+                            },
+                            {
+                                $lookup: {
+
+                                    from: ModelName.states,
+                                    let: { 'countryCode_': '$steps.data.countries.code' },
+                                    localField: 'steps.data.state',
+                                    foreignField: 'stateCode',
+                                    as: 'steps.data.states',
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $eq: ['$countryCode', '$$countryCode_']
+                                                }
+                                            }
+                                        },
+                                        {
+                                            $project: {
+                                                name: 1,
+                                                stateCode: 1,
+                                                countryCode: 1
+                                            }
+                                        }]
+                                }
+                            },
+                            //designation lookup
+                            {
+                                $lookup: {
+                                    from: ModelName.designationModel,
+                                    localField: 'steps.data.designationId',
+                                    let: {
+                                        summaryId: '$steps.data.designationSummaryId',
+                                    },
+                                    foreignField: '_id',
+                                    as: 'steps.data.designationData',
+                                    pipeline: [
+                                        {
+                                            $project: {
+                                                name: 1,
+                                                summaries: 1
+                                            },
+
+                                        },
+                                        {
+                                            $addFields: {
+                                                summaries: {
+                                                    $first: {
+
+                                                        $filter: {
+                                                            input: "$summaries",
+                                                            as: "summary",
+                                                            cond: {
+                                                                $eq: ["$$summary._id",
+                                                                    "$$summaryId"]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    ]
+                                }
+                            },
+                            //education lookup
+                            {
+                                $lookup: {
+
+                                    from: ModelName.educations,
+                                    localField: 'steps.data.educationId',
+                                    let: {
+                                        summaryId: '$steps.data.educationSummaryId',
+                                        performanceId: '$steps.data.educationPerformanceId'
+                                    },
+                                    foreignField: '_id',
+                                    as: 'steps.data.educationData',
+                                    pipeline: [
+                                        {
+                                            $project: {
+                                                name: 1,
+                                                degreeType: 1,
+                                                summaries: 1,
+                                                performances: 1
+
+                                            }
+                                        },
+                                        {
+                                            $addFields: {
+                                                summaries: {
+                                                    $first: {
+                                                        $filter: {
+                                                            input: "$summaries",
+                                                            as: "summary",
+                                                            cond: {
+                                                                $eq: ["$$summary._id",
+                                                                    "$$summaryId"]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            $addFields: {
+                                                performances: {
+                                                    $first: {
+                                                        $filter: {
+                                                            input: "$performances",
+                                                            as: "performance",
+                                                            cond: {
+                                                                $eq: ["$$performance._id",
+                                                                    "$$performanceId"]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+
+                            {
+                                $lookup: {
+                                    from: ModelName.designationModel,
+                                    localField: 'steps.data.experienceId',
+                                    let: {
+                                        summaryId: '$steps.data.experienceSummaryId',
+                                    },
+                                    foreignField: '_id',
+                                    as: 'steps.data.experienceData',
+                                    pipeline: [
+                                        {
+                                            $project: {
+                                                name: 1,
+                                                summaries: 1
+                                            },
+
+                                        },
+                                        {
+                                            $addFields: {
+                                                summaries: {
+                                                    $first: {
+
+                                                        $filter: {
+                                                            input: "$summaries",
+                                                            as: "summary",
+                                                            cond: {
+                                                                $eq: ["$$summary._id",
+                                                                    "$$summaryId"]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    ]
+                                }
+                            },
+
+                            {
+                                $lookup: {
+
+                                    from: ModelName.userModel,
+                                    localField: 'userId',
+                                    foreignField: '_id',
+                                    as: 'userData',
+                                    pipeline: [
+                                        {
+                                            $project: {
+                                                first_name: 1,
+                                                last_name: 1,
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: '$steps.data.states',
+                                    preserveNullAndEmptyArrays: true
                                 },
 
                             },
                             {
-                                $addFields: {
-                                    summaries: {
-                                        $first: {
-
-                                            $filter: {
-                                                input: "$summaries",
-                                                as: "summary",
-                                                cond: {
-                                                    $eq: ["$$summary._id",
-                                                        "$$summaryId"]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        ]
-                    }
-                },
-                //education lookup
-                {
-                    $lookup: {
-
-                        from: ModelName.educations,
-                        localField: 'steps.data.educationId',
-                        let: {
-                            summaryId: '$steps.data.educationSummaryId',
-                            performanceId: '$steps.data.educationPerformanceId'
-                        },
-                        foreignField: '_id',
-                        as: 'steps.data.educationData',
-                        pipeline: [
-                            {
-                                $project: {
-                                    name: 1,
-                                    degreeType: 1,
-                                    summaries: 1,
-                                    performances: 1
-
-                                }
-                            },
-                            {
-                                $addFields: {
-                                    summaries: {
-                                        $first: {
-                                            $filter: {
-                                                input: "$summaries",
-                                                as: "summary",
-                                                cond: {
-                                                    $eq: ["$$summary._id",
-                                                        "$$summaryId"]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                $addFields: {
-                                    performances: {
-                                        $first: {
-                                            $filter: {
-                                                input: "$performances",
-                                                as: "performance",
-                                                cond: {
-                                                    $eq: ["$$performance._id",
-                                                        "$$performanceId"]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-
-                {
-                    $lookup: {
-                        from: ModelName.designationModel,
-                        localField: 'steps.data.experienceId',
-                        let: {
-                            summaryId: '$steps.data.experienceSummaryId',
-                        },
-                        foreignField: '_id',
-                        as: 'steps.data.experienceData',
-                        pipeline: [
-                            {
-                                $project: {
-                                    name: 1,
-                                    summaries: 1
+                                $unwind: {
+                                    path: '$steps.data.designationData',
+                                    preserveNullAndEmptyArrays: true
                                 },
-
                             },
                             {
-                                $addFields: {
-                                    summaries: {
-                                        $first: {
-
-                                            $filter: {
-                                                input: "$summaries",
-                                                as: "summary",
-                                                cond: {
-                                                    $eq: ["$$summary._id",
-                                                        "$$summaryId"]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        ]
-                    }
-                },
-                // {
-                //     $lookup: {
-                //         from: ModelName.skills,
-                //         localField: 'steps.data',
-                //         foreignField: '_id',
-                //         as: 'steps.data.skills'
-                //     }
-                // },
-                {
-                    $lookup: {
-
-                        from: ModelName.userModel,
-                        localField: 'userId',
-                        foreignField: '_id',
-                        as: 'userData',
-                        pipeline: [
+                                $unwind: {
+                                    path: '$steps.data.educationData',
+                                    preserveNullAndEmptyArrays: true
+                                },
+                            },
                             {
-                                $project: {
-                                    first_name: 1,
-                                    last_name: 1,
+                                $unwind: {
+                                    path: '$steps.data.experienceData',
+                                    preserveNullAndEmptyArrays: true
+                                },
+                            },
+                            {
+                                $group: {
+                                    _id: "$_id",
+                                    steps: { $push: "$steps" },
+                                    __v: { $first: "$__v" }
+                                },
+                            },
+                            {
+                                $unwind: '$steps'
+                            },
+                        ],
+                        simpleArray: [
+                            // Pipeline for handling simple array elements
+                            {
+                                $match: {
+                                    'steps.data': { $type: 'string' }
                                 }
-                            }
+                            },
+                            {
+                                $group: {
+                                    _id: "$_id",
+                                    steps: { $push: "$steps" },
+                                    __v: { $first: "$__v" }
+                                },
+                            },
+                            {
+                                $unwind: '$steps'
+                            },
                         ]
+
                     }
-                },
-                {
-                    $unwind: {
-                        path: '$steps.data.states',
-                        preserveNullAndEmptyArrays: true
-                    },
 
                 },
                 {
-                    $unwind: {
-                        path: '$steps.data.designationData',
-                        preserveNullAndEmptyArrays: true
-                    },
+                    $project: {
+                        mergedArray: {
+                            $concatArrays: ["$simpleArray", "$jsonArray"]
+                        }
+                    }
                 },
+
                 {
                     $unwind: {
-                        path: '$steps.data.educationData',
+                        path: '$mergedArray',
                         preserveNullAndEmptyArrays: true
                     },
                 },
-                {
-                    $unwind: {
-                        path: '$steps.data.experienceData',
-                        preserveNullAndEmptyArrays: true
-                    },
-                },
+
                 {
                     $group: {
-                        _id: "$_id",
-                        steps: { $push: "$steps" },
-                        __v: { $first: "$__v" }
-                    },
+                        _id: "$mergedArray._id",
+                        steps: { $push: '$mergedArray.steps' },
+                        __v: { $first: '$__v' }
+                    }
                 },
+
                 {
-                    $unwind: '$steps'
+                    $unwind: {
+                        path: '$steps',
+                        preserveNullAndEmptyArrays: true
+                    },
                 },
                 {
                     $group: {
                         _id: {
                             _id: '$_id',
-                            step: '$steps.step'
+                            step: '$steps.step',
+                            stepId: "$steps._id"
                         },
                         data: { $push: '$steps.data' },
                         __v: { $first: '$__v' }
@@ -425,28 +496,40 @@ export const userResumeService = new class {
                 {
                     $group: {
                         _id: '$_id._id',
-                        steps: { $push: { step: '$_id.step', data: '$data' } },
+                        steps: {
+                            $push: { _id: "$_id.stepId", step: '$_id.step', data: '$data' }
+                        },
                         __v: { $first: '$__v' }
                     }
                 },
-                {
-                    $project: {
-                        _id: "$_id",
-                        steps: "$steps",
-                        userId: "$userId",
-                        userData: "$userData",
-                        is_active: "$is_active",
 
-
-                    }
-                }
+                // Add stages for combining the results or any additional processing
             ];
+
+            // You can then use the results of each sub-pipeline as needed.
 
             finalResponse.previewData = await this.getResumeAggregate(pipeline)
         }
-        if (download == 'true')
+        if (preview == 'true' || download == "true") {
+            finalResponse.previewData = await this.getResumeSchemaInfo(resumeId, finalResponse.previewData, true)
+            let prefix = finalResponse.previewData.find((preview: any) => preview.slug == 'personal').data[0]?.full_name ?? ""
+            prefix += "-" + finalResponse.previewData.find((preview: any) => preview.slug == 'designation').data[0]?.designationData.name ?? ""
+
+
             finalResponse.fileContent = await this.previewPDFpreview(finalResponse.previewData)
-        else finalResponse.currentStep = await this.getResumeSchemaInfo(resumeId)
+            prefix += "-" + new Date().getTime() + ".pdf"
+            if (download == "true") {
+                let downloadData: any = await fileHelperService.generatePDF(finalResponse.fileContent, prefix)
+                if (downloadData?.url)
+                    await this.updateUserResume({ _id: resumeId }, { link: downloadData.url })
+                finalResponse.url = downloadData.url
+                delete finalResponse.fileContent
+            }
+            delete finalResponse.previewData
+        }
+        else
+            finalResponse.currentStep = await this.getResumeSchemaInfo(resumeId, finalResponse.previewData)
+
         return finalResponse
 
     }
@@ -454,23 +537,8 @@ export const userResumeService = new class {
 
     //#region  preview resume in pdf formate
     async previewPDFpreview(data: any) {
+        return await fileHelperService.makeDynamicResumeObject(data)
 
-        const fileContent = `
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verification</title>
-          </head>
-          <body>
-            <div>
-              Please verify your mail
-              <a href="#">Verify here</a>
-            </div>
-          </body>
-        </html>`;
-
-        return fileHelperService.generatePDF(fileContent, './sample.pdf')
     }
 
     //#region get data type
@@ -550,6 +618,7 @@ export const userResumeService = new class {
                 localField: 'steps.data.designationId',
                 let: {
                     summaryId: '$steps.data.designationSummaryId',
+                    customSummary: "$steps.data.customSummary"
                 },
                 foreignField: '_id',
                 as: 'steps.data.designationData',
@@ -557,33 +626,37 @@ export const userResumeService = new class {
                     {
                         $project: {
                             name: 1,
-                            summaries: 1
+                            summaries: 1,
                         },
 
                     },
                     {
                         $addFields: {
                             summaries: {
-                                $first: {
+                                $cond: {
+                                    if: {
+                                        $ne: ['$$customSummary', null]
+                                    },
+                                    then: "$$customSummary",
+                                    else: {
+                                        $first: {
+                                            $filter: {
+                                                input: "$summaries",
+                                                as: "summary",
+                                                cond: {
+                                                    $and: [
+                                                        {
+                                                            $eq: ["$$summary._id",
+                                                                "$$summaryId"]
+                                                        },
 
-                                    $filter: {
-                                        input: "$summaries",
-                                        as: "summary",
-                                        cond: {
-                                            $and: [
-                                                {
-                                                    $eq: ["$$summary._id",
-                                                        "$$summaryId"]
-                                                },
-                                                {
-                                                    $eq: ["$$summary.type",
-                                                        SUMMARY_ABT]
-                                                },
-
-                                            ]
+                                                    ]
+                                                }
+                                            }
                                         }
                                     }
-                                }
+                                },
+
                             }
                         }
                     }
@@ -635,8 +708,18 @@ export const userResumeService = new class {
     //#endregion
 
     //#region 
-    async getResumeSchemaInfo(resumeId: Types.ObjectId) {
+    async getResumeSchemaInfo(resumeId: Types.ObjectId, previewData: any, is_schema = false) {
         const match: any = { is_active: ACTIVE }
+        let matchOrder = 1
+        const schemaList = await this.getResumeSchemaAggregate([{ $match: match }], true)
+        if (is_schema) {
+            schemaList.map((schema: any) => {
+                schema.data = previewData.steps.find((preview: any) => preview.step == schema.sectionID)?.data ?? []
+                delete schema.fields
+                return schema
+            })
+            return schemaList
+        }
         if (resumeId) {
             const options: any = [
                 { $match: { _id: resumeId } },
@@ -650,16 +733,18 @@ export const userResumeService = new class {
             ]
             const resumeData = await this.getResumeAggregate(options)
             if (resumeData) {
-                const nextOptions = [{ $match: { sectionID: resumeData.currentStep } }, { $project: { order: 1 } }]
-                const getNextOrder = await this.getResumeSchemaAggregate(nextOptions)
-                if (getNextOrder) match["order"] = (getNextOrder?.order ?? 0) + 1
+                previewData.steps = previewData?.steps?.map((each: any) => {
+                    each.slug = schemaList.find((schema: any) => schema.sectionID == each.step)?.slug
+                    return each
+                }
+                )
+                const foundNextOrder = schemaList.find((each: any) => each.sectionID == resumeData.currentStep)
+                if (foundNextOrder) matchOrder = (foundNextOrder?.order ?? 0) + 1
 
             }
             // return resumeData
-        } else
-            match["order"] = 1
-        const mainOptions = [{ $match: match }]
-        return await this.getResumeSchemaAggregate(mainOptions)
+        }
+        return schemaList.find((each: any) => each.order == matchOrder)
 
     }
     //#endregion
@@ -685,16 +770,19 @@ export const userResumeService = new class {
         if (is_all)
             for (let i = 0; i < fields.length; i++) {
                 const field: any = fields[i]
-                const dataTypes = field.dataTypes
-                if (dataTypes[is_array]) {
-                    modifiedObj = payload
-                    break
-                } const checkField: any = Object.keys(payload).find((pKey: any) => field.name == pKey)
+                const checkField: any = Object.keys(payload).find((pKey: any) => field.name == pKey)
                 if (!checkField)
 
                     if (!field.dataTypes[is_optional]) throw new HttpError(`Require field missing :${field.name}`)
                     else continue
-
+                const dataTypes = field.dataTypes
+                if (dataTypes[is_array]) {
+                    modifiedObj = payload[field.name].map((each: any) => {
+                        customValidationDataTypes(dataTypes, each, field.name, each)
+                        return each
+                    })
+                    break
+                }
                 const value: any = payload[checkField]
 
                 customValidationDataTypes(dataTypes, value, checkField, payload)
@@ -707,7 +795,7 @@ export const userResumeService = new class {
                     throw new HttpError(`${key}:not present in this section`)
                 const dataTypes = checkField.dataTypes
                 const value: any = payload[key]
-                customValidationDataTypes(dataTypes, value, checkField, payload)
+                customValidationDataTypes(dataTypes, value, checkField.name, payload)
             }
         }
         return { schemaData, customPayload: modifiedObj }

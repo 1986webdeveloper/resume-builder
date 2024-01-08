@@ -88,14 +88,13 @@ export const PRE_DEFINED_ALLOWED_VALUES = {
 }
 
 
-export const customValidationDataTypes = (type: any, value: any, filedName: string, payload: any) => {
+export const customValidationDataTypes = (type: any, value: any, filedName: string, payload: any = {}) => {
   let errorKey
   for (let dKey in type) {
     if (!value && !type[is_optional]) {
       const message = PRE_DEFINED_ALLOWED_VALUES[dKey] || "Require field missing"
       if (message) throw new HttpError(message, HTTP_STATUS_CODE.bad_request)
     }
-
     else if (type[is_optional] && !value) continue
     else if (dKey == is_string && typeof value != "string") errorKey = dKey
     else if (dKey == is_number && typeof value != "number") errorKey = dKey
@@ -103,7 +102,6 @@ export const customValidationDataTypes = (type: any, value: any, filedName: stri
     else if (dKey == is_date && typeof value != "string") errorKey = dKey
     else if (dKey == is_object_id && typeof value == 'string') payload[filedName] = new Types.ObjectId(value)
     else if (dKey == is_object && typeof value != 'object') errorKey = dKey
-
     if (errorKey) {
       const message = PRE_DEFINED_ALLOWED_VALUES[errorKey].replace("##FIELD##", filedName)
       throw new HttpError(message, HTTP_STATUS_CODE.bad_request)

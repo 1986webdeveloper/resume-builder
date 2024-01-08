@@ -19,9 +19,11 @@ route.post('/editOrDeleteResumeSchema',
     asyncHandler(userAuth),
     asyncHandler(ResumeController.editOrDeleteResumeSchema))
 route.post('/changeSectionOrder', asyncHandler(userAuth),
-    asyncHandler(ResumeController.editOrDeleteResumeSchema))
+    asyncHandler(ResumeController.changeSectionOrder))
 
 route.post('/editOrDeleteUserResume', asyncHandler(userAuth),
     asyncHandler(ResumeController.editOrDeleteUserResume))
+
+route.get('/stepInfo', asyncHandler(userAuth), asyncHandler(ResumeController.stepInfo))
 
 export const resumeRouter = route

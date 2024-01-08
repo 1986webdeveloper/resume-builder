@@ -275,12 +275,10 @@ export class EditOrDeleteResume {
     resumeId!: Types.ObjectId
 
     @Transform((value: any) => value ? new Types.ObjectId(value) : null)
-    @IsNotEmpty()
+    @IsOptional()
     sectionId!: Types.ObjectId
 
-    @ValidateIf((obj) => Object.keys(obj.data).length > 0)
     @Transform((value: any) => value ? new Types.ObjectId(value) : null)
-    @IsNotEmpty()
     elementId!: Types.ObjectId
 
     @ValidateIf((obj) => obj.elementId)

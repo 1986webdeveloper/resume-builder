@@ -1,6 +1,9 @@
 
 import { Request, Response } from 'express'
-import { ChangeOrderSchema, CreateDataTypes, CreateResumeSchema, EditOrDeleteResume, EditOrDeleteResumeSchema, GetResumeList, UserResumeMaster } from '../validations/resume.validation'
+import {
+    ChangeOrderSchema, CreateDataTypes, CreateResumeSchema, EditOrDeleteResume,
+    EditOrDeleteResumeSchema, GetResumeList, UserResumeMaster
+} from '../validations/resume.validation'
 import { HttpError, checkValidation } from '../common/error.service'
 import { userResumeService } from '../service/resume.service'
 import {
@@ -38,16 +41,11 @@ export class ResumeController {
     }
     //#endregion
 
-
-
     //#region  get resume information
     static async getResumeInfo(req: Request, res: Response): Promise<Response> {
         const userInput: any = req.query
         // check validation
-        const resumeInfo: any = await userResumeService.checkUsercurrentStep({
-            _id: userInput.resumeId,
-            download: userInput.download
-        })
+        const resumeInfo: any = await userResumeService.checkUsercurrentStep(userInput)
         return res.json({ message: Success, data: resumeInfo })
     }
     //#endregion
@@ -218,20 +216,24 @@ export class ResumeController {
         //check validation
         await checkValidation(userInput)
         const filter: any = { _id: userInput.schemaId }
+        const checkCurrentStep: any = await userResumeService.getResumeSchema(filter, ['_id', 'order'])
+        const currentStepOrder = checkCurrentStep?.order
         const updateOrder = { order: userInput.order }
+        const checkChangeOrder: any = await userResumeService.getResumeSchema(updateOrder, ['_id', 'order'])
+        if (checkChangeOrder)
+            await userResumeService.updateResumeSchema({ _id: checkChangeOrder._id }, { order: currentStepOrder })
         const updateRecord = await userResumeService.updateResumeSchema(filter, updateOrder)
-        if (updateRecord) {
-            const filter = {
-                order: { $gte: userInput.order },
-                is_active: ACTIVE,
-                _id: { $ne: userInput.schemaId }
-            }
-            const updateOrder = { "$inc": { order: 1 } }
-            await userResumeService.updateSchemas(filter, updateOrder)
-        }
+        // if (updateRecord) {
+        //     const filter = {
+        //         order: { $gt: userInput.order },
+        //         is_active: ACTIVE,
+        //     }
+        //     const updateOrder = { "$inc": { order: 1 } }
+        //     await userResumeService.updateSchemas(filter, updateOrder)
+        // }
 
-
-        return res.json()
+        const responseData = { message: Success, data: updateRecord }
+        return res.json(responseData)
     }
     //#endregion
 
@@ -278,18 +280,29 @@ export class ResumeController {
                 }
                 if (is_update_data) {
                     //check update fields
-                    await userResumeService.checkStepAndRequiredFields(userInput.data, checkData.steps.step, false)
+                    await (await userResumeService.checkStepAndRequiredFields(userInput.data, checkData.steps.step, false))
                     for (let key in userInput.data) {
                         updateData[`steps.$[section].data.$[element].${key}`] = userInput.data[key]
                     }
-                }
+                } else if (is_active_delete) updateData[`steps.$[section].data.$[element].is_active`] = userInput.active
             } else if (is_active_delete)
                 updateData["$set"] = { "steps.$[section].is_active": userInput.active }
-        }
+            else if (is_update_data && userInput.data.skills) updateData["$set"] = { "steps.$[section].data": userInput.data.skills }
+        } else if (is_active_delete) updateData["is_active"] = userInput.active
         const update = await userResumeService.updateUserResume(update_filter, updateData, arrayFilters)
         const responseData = { message: Success, data: update }
         return res.json(responseData)
 
+    }
+    //#endregion
+
+    //#region  step info
+    static async stepInfo(req: Request, res: Response): Promise<Response> {
+        const filter = { is_active: ACTIVE }
+        const attributes = ['_id', 'title', 'sectionID', 'slug', 'order']
+        const steps = await userResumeService.getResumeSchemaData(filter, attributes)
+        const responseData = { message: Success, data: steps }
+        return res.json(responseData)
     }
     //#endregion
 

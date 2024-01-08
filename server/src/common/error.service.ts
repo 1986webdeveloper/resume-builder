@@ -25,9 +25,9 @@ export const asyncHandler =
           .status(errorObj.statusCode)
           .json({ error: errorObj.message });
       } else {
-        console.log({ errorObj })
         const message = errorObj?.error ?? "Internal Server Error"
         // Handle other types of errors
+        console.log(errorObj)
         return res
           .status(HTTP_STATUS_CODE.internal_error)
           .json({ error: message });
@@ -44,7 +44,6 @@ export const checkValidation = async (userInput: any) => {
   const validateUser = await validate(userInput);
   const isErrorFound: any = validateUser.find((val) => true);
   const messageObj = isErrorFound?.constraints ?? {};
-
   for (const key in messageObj) {
     throw new HttpError(messageObj[key], HTTP_STATUS_CODE.bad_request);
   }
