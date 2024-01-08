@@ -4,7 +4,7 @@ import { httpService } from "../../services/https";
 import { useEffect, useState } from "react";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { Button } from "flowbite-react";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import {
   clearSteps,
@@ -37,25 +37,10 @@ export default function ResumeBuilder() {
   const dispatch = useDispatch();
 
   const newResume = () => {
-    httpService
-      .get(`resume/resumeInfo`)
-      .then((res: any) => {
-        dispatch(
-          setCurrentStep({
-            slug: res.data?.data?.currentStep?.slug,
-            sectionID: res.data?.data?.currentStep?.sectionID,
-            title: res.data?.data?.currentStep?.title,
-          })
-        );
-        dispatch(clearSteps());
-        dispatch(clearFormData());
-        return navigate("build", {
-          state: {
-            id: res.data?.data?.currentStep?.sectionID,
-          },
-        });
-      })
-      .catch((err) => toast.error(err?.response));
+    dispatch(clearSteps());
+    dispatch(clearFormData());
+    localStorage.removeItem("resumeId");
+    navigate("build");
   };
 
   const getResumeList = () => {
@@ -67,32 +52,8 @@ export default function ResumeBuilder() {
   };
 
   const onContinue = (id: string) => {
-    httpService
-      .get(`resume/resumeInfo?resumeId=${id}`)
-      .then((res: any) => {
-        dispatch(
-          setCurrentStep({
-            slug: res.data?.data?.currentStep?.slug,
-            sectionID: res.data?.data?.currentStep?.sectionID,
-            title: res.data?.data?.currentStep?.title,
-            resumeId: id,
-          })
-        );
-        // Dispatch the action of setting the filled steps's data into localstorage.
-        let previewArr = res.data?.data?.previewData?.steps?.map(
-          (preview: any) => {
-            return {
-              key: preview.slug,
-              value: { _id: preview._id, data: preview.data },
-            };
-          }
-        );
-        dispatch(setFormData(previewArr));
-        navigate(`build`, {
-          state: { id: res.data?.data?.currentStep?.sectionID, resumeId: id },
-        });
-      })
-      .catch((err) => toast.error(err.response));
+    localStorage.setItem("resumeId", id);
+    navigate(`build`);
   };
 
   const onDelete = (id: string) => {
@@ -124,7 +85,9 @@ export default function ResumeBuilder() {
   return (
     <div className="w-full h-full">
       <div className="w-full mt-3 relative">
-        <h1 className="font-bold text-3xl text-center">Resume List</h1>
+        <h1 className="font-bold text-3xl text-center dark:text-gray-100">
+          Resume List
+        </h1>
         <Button
           color="dark"
           pill

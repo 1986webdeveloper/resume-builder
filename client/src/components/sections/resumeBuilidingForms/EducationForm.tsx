@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FaPlusCircle, FaTrash } from "react-icons/fa";
 import { BsDatabaseExclamation } from "react-icons/bs";
 import { httpService } from "../../../services/https";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -287,7 +287,7 @@ export default function EducationForm() {
                   message: "This field is required",
                 },
               })}
-              color={errors?.education ? "failure" : ""}
+              // color={errors?.education ? "failure" : ""}
             >
               <option value="" disabled>
                 Select Education
@@ -314,7 +314,7 @@ export default function EducationForm() {
               })}
               id="instituteName"
               type="text"
-              color={errors?.instituteName ? "failure" : ""}
+              // color={errors?.instituteName ? "failure" : ""}
             />
             {errors?.instituteName && (
               <p className="text-red-600 mt-1 text-xs">
@@ -382,7 +382,7 @@ export default function EducationForm() {
                 })}
                 id="performance"
                 type="text"
-                color={errors?.performance ? "failure" : ""}
+                // color={errors?.performance ? "failure" : ""}
               />
               {errors?.performance && (
                 <p className="text-red-600 mt-1 text-xs">
@@ -407,7 +407,7 @@ export default function EducationForm() {
                 })}
                 id="label"
                 type="text"
-                color={errors?.label ? "failure" : ""}
+                // color={errors?.label ? "failure" : ""}
               />
               {errors?.label && (
                 <p className="text-red-600 mt-1 text-xs">

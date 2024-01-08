@@ -6,7 +6,7 @@ import { FaPlusCircle } from "react-icons/fa";
 import { BsDatabaseExclamation } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { httpService } from "../../../services/https";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -272,7 +272,7 @@ export default function ExperienceForm() {
               })}
               id="companyName"
               type="text"
-              color={errors?.companyName ? "failure" : ""}
+              // color={errors?.companyName ? "failure" : ""}
             />
             {errors?.companyName && (
               <p className="text-red-600 mt-1 text-xs">
@@ -343,7 +343,7 @@ export default function ExperienceForm() {
                   message: "There should be no empty spaces.",
                 },
               })}
-              color={errors?.designation ? "failure" : ""}
+              // color={errors?.designation ? "failure" : ""}
             >
               <option value="" disabled>
                 Select Designation

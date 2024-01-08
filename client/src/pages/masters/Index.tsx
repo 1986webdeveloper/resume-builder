@@ -12,7 +12,9 @@ export default function Masters() {
   return (
     <>
       <div className="w-full mt-3 relative">
-        <h1 className="font-bold text-3xl text-center">Choose Collection</h1>
+        <h1 className="font-bold text-3xl text-center dark:text-gray-100">
+          Choose Collection
+        </h1>
       </div>
       <div className="mt-2">
         <CustomBreadcrumb />

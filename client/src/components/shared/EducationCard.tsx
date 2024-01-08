@@ -16,7 +16,7 @@ export default function EducationCard({
   handleOpenDeleteModal,
 }: ComponentTypes) {
   return (
-    <div className="flex flex-col gap-2 px-4 py-4 shadow-xl border rounded-lg">
+    <div className="flex flex-col gap-2 px-4 py-4 shadow-xl border rounded-lg dark:bg-gray-800 dark:text-gray-100 transition-all duration-300 ease-in-out hover:bg-gray-50 hover:shadow-2xl hover:scale-105">
       <div className="flex gap-2 items-center justify-between">
         <NavLink to={`${title}`} state={{ id: id }}>
           <h1 className="font-bold text-lg capitalize">{title}</h1>

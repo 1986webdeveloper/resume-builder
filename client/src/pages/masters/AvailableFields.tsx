@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
 import SummaryCard from "../../components/shared/SummaryCard";
 import RichTextEditor from "../../components/shared/RichTextEditor";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";

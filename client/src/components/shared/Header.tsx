@@ -17,7 +17,9 @@ export default function Header({
 }: ComponentTypes) {
   return (
     <div className="max-w-full relative mt-3">
-      <h1 className="font-bold text-3xl text-center">{title}</h1>
+      <h1 className="font-bold text-3xl text-center dark:text-gray-100">
+        {title}
+      </h1>
       {btnNeeded && (
         <button
           className="absolute top-0 right-1 bg-primary px-5 py-3 text-center rounded-lg text-white flex gap-2 items-center"

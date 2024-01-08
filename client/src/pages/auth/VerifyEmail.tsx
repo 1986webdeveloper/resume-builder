@@ -7,7 +7,7 @@ import ButtonWithIcon from "../../components/shared/ButtonWithIcon";
 import { FaUserPlus } from "react-icons/fa";
 import { fieldTypes } from "../../types/fieldTypes";
 import { verify } from "../../services/auth/verify";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { resetPassword } from "../../services/auth/resetPassword";
 import { forgotPassword } from "../../services/auth/forgotPassword";
 

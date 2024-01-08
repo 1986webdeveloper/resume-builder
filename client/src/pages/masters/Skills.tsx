@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Card from "../../components/shared/Card";
 import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";

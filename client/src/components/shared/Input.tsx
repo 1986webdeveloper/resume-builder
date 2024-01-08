@@ -23,7 +23,7 @@ export default function Input({
   color,
   errorPattern,
 }: ComponentTypes) {
-  const fixedInputClass = `w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:bg-white ${color} `;
+  const fixedInputClass = `w-full px-8 py-4 rounded-lg font-medium bg-gray-100 dark:bg-gray-700 dark:text-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:bg-white ${color} `;
   return (
     <input
       {...register(id, {

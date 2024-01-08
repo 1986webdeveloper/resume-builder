@@ -7,7 +7,7 @@ import ButtonWithIcon from "../../components/shared/ButtonWithIcon";
 import { fieldTypes } from "../../types/fieldTypes";
 import { useState } from "react";
 import { loginUser } from "../../services/auth/loginUser";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { login } from "../../store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import bgImg from "../../assets/bg.jpg";
@@ -48,19 +48,13 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-screen-lg m-0 sm:m-10 bg-white shadow-gray-700 shadow-xl sm:rounded-lg flex justify-center flex-1">
+    <div className="max-w-screen-lg m-0 sm:m-10 bg-white shadow-gray-700 dark:bg-gray-800 dark:shadow-gray-900 shadow-xl sm:rounded-lg flex justify-center flex-1">
       <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
         <div className="mt-12 flex flex-col items-center">
           <h1 className="text-2xl xl:text-3xl font-extrabold">Sign In</h1>
           <div className="w-full flex-1">
-            <div className="my-12 border-b text-center">
-              <div className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                sign in with e-mail
-              </div>
-            </div>
-
             <form
-              className="mx-auto max-w-xs"
+              className="mx-auto max-w-xs mt-12"
               onSubmit={handleSubmit(onSubmit)}
             >
               {loginFields.map((field: fieldTypes, index: number) => (
@@ -114,7 +108,7 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
+      <div className="flex-1 bg-indigo-100 dark:bg-gray-800 text-center hidden lg:flex">
         <div
           className="w-full bg-center bg-no-repeat bg-cover"
           style={{

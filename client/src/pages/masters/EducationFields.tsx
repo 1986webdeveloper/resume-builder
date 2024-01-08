@@ -6,7 +6,7 @@ import AddModal from "../../components/sections/AddModal";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
 import { useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { BsDatabaseExclamation } from "react-icons/bs";

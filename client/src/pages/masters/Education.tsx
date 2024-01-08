@@ -5,7 +5,7 @@ import AddModal from "../../components/sections/AddModal";
 import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { httpService } from "../../services/https";
 import Modal from "../../components/sections/DeleteModal";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";

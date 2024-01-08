@@ -7,7 +7,7 @@ import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
 import { updateFormData } from "../../../store/slices/formDataSlice";
 import { personalFormTypes } from "../../../types/formTypes";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 interface countryTypes {
   name: string;
@@ -23,11 +23,7 @@ interface cityTypes {
   name: string;
 }
 
-interface propTypes {
-  id: string;
-}
-
-export default function PersonalForm({ id }: propTypes) {
+export default function PersonalForm() {
   const formData: any = useSelector(
     (state: RootState) => state.formData.personal
   );
@@ -55,9 +51,7 @@ export default function PersonalForm({ id }: propTypes) {
   const [allStates, setAllStates] = useState([] as stateTypes[]);
   const [allCities, setAllCities] = useState([] as cityTypes[]);
   const dispatch = useDispatch();
-  const resumeId = useSelector(
-    (state: RootState) => state.currentStep.resumeId
-  );
+  const currentStep = useSelector((state: RootState) => state.currentStep);
 
   const {
     register,
@@ -146,7 +140,7 @@ export default function PersonalForm({ id }: propTypes) {
 
   const onEdit = (data: any) => {
     const body = {
-      resumeId: resumeId,
+      resumeId: currentStep?.resumeId,
       elementId: formData?.data[0]?._id,
       sectionId: formData?._id,
       data: {
@@ -186,7 +180,7 @@ export default function PersonalForm({ id }: propTypes) {
       onEdit(data);
     } else {
       const body = {
-        step: id,
+        step: currentStep?.sectionID,
         data: {
           ...data,
           country: selectedCountry.code,
@@ -241,7 +235,7 @@ export default function PersonalForm({ id }: propTypes) {
               })}
               id="full_name"
               type="text"
-              color={errors?.full_name ? "failure" : ""}
+              // color={errors?.full_name ? "failure" : ""}
             />
             {errors?.full_name && (
               <p className="text-red-600 mt-1 text-xs">
@@ -261,7 +255,7 @@ export default function PersonalForm({ id }: propTypes) {
               id="email"
               type="email"
               placeholder="name@flowbite.com"
-              color={errors?.email ? "failure" : ""}
+              // color={errors?.email ? "failure" : ""}
             />
             {errors.email?.type && (
               <p className="text-red-600 mt-1 text-xs">
@@ -282,7 +276,7 @@ export default function PersonalForm({ id }: propTypes) {
                 },
               })}
               defaultValue={initialCountry?.name || ""}
-              color={errors?.country ? "failure" : ""}
+              // color={errors?.country ? "failure" : ""}
             >
               <option value="" disabled>
                 Select Country
@@ -306,7 +300,7 @@ export default function PersonalForm({ id }: propTypes) {
                 },
               })}
               defaultValue={initialState?.name || ""}
-              color={errors?.state ? "failure" : ""}
+              // color={errors?.state ? "failure" : ""}
             >
               <option value="" disabled>
                 Select State
@@ -332,7 +326,7 @@ export default function PersonalForm({ id }: propTypes) {
                 },
               })}
               defaultValue={initialCity}
-              color={errors?.city ? "failure" : ""}
+              // color={errors?.city ? "failure" : ""}
             >
               <option value="" disabled>
                 Select City
@@ -356,10 +350,14 @@ export default function PersonalForm({ id }: propTypes) {
                   value: /^[^\s]+(?:$|.*[^\s]+$)/,
                   message: "There should be no empty spaces.",
                 },
+                minLength: {
+                  value: 10,
+                  message: "Mobile No should be 10 digits",
+                },
               })}
               id="mobileNo"
               type="number"
-              color={errors?.mobileNo ? "failure" : ""}
+              // color={errors?.mobileNo ? "failure" : ""}
             />
             {errors.mobileNo?.type && (
               <p className="text-red-600 mt-1 text-xs">
@@ -379,7 +377,7 @@ export default function PersonalForm({ id }: propTypes) {
                   message: "This field is required",
                 },
               })}
-              className={`rounded-lg w-full `}
+              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 `}
             />
             {errors.dob?.type && (
               <p className="text-red-600 mt-1 text-xs">
@@ -404,7 +402,7 @@ export default function PersonalForm({ id }: propTypes) {
               })}
               id="address"
               type="text"
-              color={errors?.address ? "failure" : ""}
+              // color={errors?.address ? "failure" : ""}
             />
             {errors.address?.type && (
               <p className="text-red-600 mt-1 text-xs">

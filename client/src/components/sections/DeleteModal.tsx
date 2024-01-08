@@ -18,7 +18,7 @@ export default function Modal({
       id="modal-id"
     >
       <div className="absolute bg-black opacity-80 inset-0 z-0"></div>
-      <div className="w-full  max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg  bg-white ">
+      <div className="w-full  max-w-lg p-5 relative mx-auto my-auto rounded-xl shadow-lg  bg-white dark:bg-gray-800 dark:text-gray-100 ">
         {/* <!--content--> */}
         <div className="">
           {/* <!--body--> */}

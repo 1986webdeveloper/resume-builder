@@ -7,7 +7,7 @@ import ButtonWithIcon from "../../components/shared/ButtonWithIcon";
 import { fieldTypes } from "../../types/fieldTypes";
 import { useState } from "react";
 import { registerUser } from "../../services/auth/registerUser";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import bgImg from "../../assets/bg.jpg";
 
 export default function Register() {
@@ -43,19 +43,13 @@ export default function Register() {
   };
 
   return (
-    <div className="max-w-screen-lg m-0 sm:m-10 bg-white shadow-gray-700 shadow-xl sm:rounded-lg flex justify-center flex-1">
+    <div className="max-w-screen-lg m-0 sm:m-10 bg-white dark:bg-gray-800 shadow-gray-700 shadow-xl sm:rounded-lg flex justify-center flex-1">
       <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
         <div className="mt-12 flex flex-col items-center">
           <h1 className="text-2xl xl:text-3xl font-extrabold">Sign Up</h1>
           <div className="w-full flex-1">
-            <div className="my-12 border-b text-center">
-              <div className="leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform translate-y-1/2">
-                sign up with e-mail
-              </div>
-            </div>
-
             <form
-              className="mx-auto max-w-xs"
+              className="mx-auto max-w-xs mt-12"
               onSubmit={handleSubmit(onSubmit)}
             >
               {signupFields.map((field: fieldTypes, index: number) => (
