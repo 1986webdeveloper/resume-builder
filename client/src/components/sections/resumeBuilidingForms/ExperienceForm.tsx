@@ -59,6 +59,7 @@ export default function ExperienceForm() {
     formState: { errors },
   } = useForm<experienceFormTypes | any>();
   console.log(experienceData, "expdata", formData);
+
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
       if (res.status === 200) {
@@ -140,18 +141,23 @@ export default function ExperienceForm() {
         };
         httpService
           .post(`resume/editOrDeleteUserResume`, body)
-          .then((res: any) => {
-            toast.success(res?.data?.message);
-            const previewData = getDesiredDataFromPreview(
-              res.data?.data?.steps,
-              currentStep.sectionID
-            );
-            dispatch(
-              updateFormData({
-                key: "experience",
-                value: previewData,
+          .then(() => {
+            httpService
+              .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+              .then((res: any) => {
+                const previewData = getDesiredDataFromPreview(
+                  res.data?.data?.previewData?.steps,
+                  currentStep?.sectionID
+                );
+                dispatch(
+                  updateFormData({
+                    key: "experience",
+                    value: previewData,
+                  })
+                );
+                toast.success(res?.data?.message);
               })
-            );
+              .catch((err: any) => toast.error(err?.response));
           })
           .catch((err) => {
             toast.error(err?.message);
@@ -292,7 +298,7 @@ export default function ExperienceForm() {
                   message: "This field is required",
                 },
               })}
-              className="rounded-lg w-full"
+              className="rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100"
             />
             {errors.from?.type && (
               <p className="text-red-600 mt-1 text-xs">
@@ -315,7 +321,7 @@ export default function ExperienceForm() {
             <input
               type="date"
               {...register("to")}
-              className={`rounded-lg w-full ${
+              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 ${
                 isCurrentlyWorking ? "border-gray-400 text-gray-400" : ""
               }`}
               disabled={isCurrentlyWorking}
@@ -362,13 +368,17 @@ export default function ExperienceForm() {
               defaultData={textAreaData}
             />
           </div>
-          <Button className="mt-2" type="submit">
+          <Button outline className=" bg-primary" color="dark" type="submit">
             <span className="mr-2">
               <FaPlusCircle />
             </span>
             Add
           </Button>
-          <Button color="success" onClick={onContinue}>
+          <Button
+            color="success"
+            onClick={onContinue}
+            disabled={experienceData.length ? false : true}
+          >
             Continue
           </Button>
         </form>
@@ -378,7 +388,7 @@ export default function ExperienceForm() {
               {summaries.map((summary) => (
                 <div
                   key={summary._id}
-                  className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer hover:bg-gray-100"
+                  className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
                   onClick={() => onSummaryClick(summary)}
                 >
                   <div
@@ -405,7 +415,7 @@ export default function ExperienceForm() {
           {experienceData.map((exp: any, index: number) => (
             <div
               key={index}
-              className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
+              className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 px-4 py-4 rounded-lg transition-all duration-300 ease-in-out"
             >
               <div className="flex items-center justify-between cursor-pointer">
                 <p

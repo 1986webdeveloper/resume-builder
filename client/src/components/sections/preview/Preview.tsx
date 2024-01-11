@@ -48,8 +48,8 @@ export default function Preview({ steps }: propType) {
     // Set the font size for the HTML content
     if (iframeDocument) {
       iframeDocument.documentElement.style.fontSize = "8px"; // Set your desired font size here
-      iframeDocument.documentElement.style.width = "400px";
-      iframeDocument.documentElement.style.height = "500px";
+      // iframeDocument.documentElement.style.width = "400px";
+      iframeDocument.documentElement.style.height = "fit-content";
     }
   };
 
@@ -135,7 +135,7 @@ export default function Preview({ steps }: propType) {
         <Modal.Body>
           <div className="p-3 mx-auto">
             <iframe
-              className=" w-[420px] h-[500px] mx-auto shadow-xl border rounded-lg no-scrollbar "
+              className="w-[350px] min-h-[500px] mx-auto shadow-xl border rounded-lg"
               ref={iframeRef}
               title="HTML Content"
               srcDoc={resumeContent}

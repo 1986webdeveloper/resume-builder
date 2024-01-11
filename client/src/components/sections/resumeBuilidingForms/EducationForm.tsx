@@ -57,6 +57,7 @@ export default function EducationForm() {
   const [educationData, setEducationData] = useState(
     formData.data || ([] as educationFormTypes[])
   );
+  console.log(educationData, "educationData");
   const [onEditDataId, setOnEditDataId] = useState(null as number | null);
   const [educations, setEducations] = useState([] as educationtypes[]);
   const [selectedEducation, setSelectedEducation] = useState(
@@ -133,18 +134,23 @@ export default function EducationForm() {
         };
         httpService
           .post(`resume/editOrDeleteUserResume`, body)
-          .then((res: any) => {
-            toast.success(res?.data?.message);
-            const previewData = getDesiredDataFromPreview(
-              res.data?.data?.steps,
-              currentStep.sectionID
-            );
-            dispatch(
-              updateFormData({
-                key: "education",
-                value: previewData,
+          .then(() => {
+            httpService
+              .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+              .then((res: any) => {
+                const previewData = getDesiredDataFromPreview(
+                  res.data?.data?.previewData?.steps,
+                  currentStep?.sectionID
+                );
+                dispatch(
+                  updateFormData({
+                    key: "education",
+                    value: previewData,
+                  })
+                );
+                toast.success(res?.data?.message);
               })
-            );
+              .catch((err: any) => toast.error(err?.response));
           })
           .catch((err) => {
             toast.error(err?.error);
@@ -334,7 +340,7 @@ export default function EducationForm() {
                   message: "This field is required",
                 },
               })}
-              className="rounded-lg w-full"
+              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 `}
             />
             {errors.from?.type && (
               <p className="text-red-600 mt-1 text-xs">
@@ -353,7 +359,7 @@ export default function EducationForm() {
             <input
               type="date"
               {...register("to")}
-              className={`rounded-lg w-full ${
+              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 ${
                 isCurrentlyWorking ? "border-gray-400 text-gray-400" : ""
               }`}
               disabled={isCurrentlyWorking}
@@ -364,7 +370,7 @@ export default function EducationForm() {
               </p>
             )}
           </div>
-          <div className="flex justify-between">
+          <div className="flex gap-2">
             <div>
               <div className="mb-2 block">
                 <Label htmlFor="performance" value="Performance" />
@@ -425,34 +431,38 @@ export default function EducationForm() {
               defaultData={textAreaData}
             />
           </div>
-          <Button className="mt-2" type="submit">
+          <Button outline className=" bg-primary" color="dark" type="submit">
             <span className="mr-2">
               <FaPlusCircle />
             </span>
             Add
           </Button>
-          <Button color="success" onClick={onContinue}>
+          <Button
+            color="success"
+            onClick={onContinue}
+            disabled={educationData.length ? false : true}
+          >
             Continue
           </Button>
         </form>
-        <div className="min-w-[50%] max-w-[51%] min-h-[200px] max-h-[500px] overflow-y-auto shadow-xl border px-4 py-8 rounded-lg flex flex-col gap-4">
-          <div className="flex gap-2 items-center">
-            {performances.map((performance) => (
-              <div
-                className="px-2 py-1 bg-gray-200 rounded-lg cursor-pointer"
-                onClick={() => onClickPerformance(performance)}
-              >
-                <p>{performance.value}</p>
+        <div className="min-w-[50%] max-w-[51%] min-h-[200px] max-h-[500px] overflow-y-auto shadow-xl border px-4 py-8 rounded-lg">
+          {summaries.length >= 1 ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2 items-center">
+                {performances.map((performance) => (
+                  <div
+                    className="px-2 py-1 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-all duration-300 ease-in-out"
+                    onClick={() => onClickPerformance(performance)}
+                  >
+                    <p>{performance.value}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div>
-            {summaries.length >= 1 ? (
               <div className="flex flex-col gap-3">
                 {summaries.map((summary) => (
                   <div
                     key={summary._id}
-                    className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer hover:bg-gray-100"
+                    className="shadow-lg border px-2 py-4 rounded-xl dark:bg-gray-800 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
                     onClick={() => onSummaryClick(summary)}
                   >
                     <div
@@ -464,24 +474,24 @@ export default function EducationForm() {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="w-full h-full flex justify-center items-center">
-                <div className="flex flex-col gap-2 items-center">
-                  <BsDatabaseExclamation color="gray" size={60} />
-                  <p className="text-sm text-center ml-2 text-gray-400">
-                    No Summaries to show.
-                  </p>
-                </div>
+            </div>
+          ) : (
+            <div className="w-full h-full flex justify-center items-center">
+              <div className="flex flex-col gap-2 items-center">
+                <BsDatabaseExclamation color="gray" size={60} />
+                <p className="text-sm text-center ml-2 text-gray-400">
+                  No Summaries to show.
+                </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">
           {educationData?.map(
             (education: educationFormTypes, index: number) => (
               <div
                 key={index}
-                className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
+                className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 px-4 py-4 rounded-lg transition-all duration-300 ease-in-out"
               >
                 <div className="flex items-center justify-between cursor-pointer">
                   <p

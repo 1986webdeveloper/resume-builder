@@ -115,18 +115,23 @@ export default function DesignationForm() {
     };
     httpService
       .post(`resume/editOrDeleteUserResume`, body)
-      .then((res: any) => {
-        toast.success(res?.data?.message);
-        const previewData = getDesiredDataFromPreview(
-          res.data?.data?.steps,
-          currentStep.sectionID
-        );
-        dispatch(
-          updateFormData({
-            key: "designation",
-            value: previewData,
+      .then(() => {
+        httpService
+          .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+          .then((res: any) => {
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.previewData?.steps,
+              currentStep?.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "designation",
+                value: previewData,
+              })
+            );
+            toast.success(res?.data?.message);
           })
-        );
+          .catch((err: any) => toast.error(err?.response));
       })
       .catch((err: any) => {
         toast.error(err.message);
@@ -225,7 +230,7 @@ export default function DesignationForm() {
             {summaries.map((summary) => (
               <div
                 key={summary._id}
-                className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer hover:bg-gray-100"
+                className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
                 onClick={() => onSummaryClick(summary)}
               >
                 <div

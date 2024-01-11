@@ -83,7 +83,7 @@ export default function VerifyEmail() {
     }
   };
   return (
-    <div className="max-w-screen-lg min-h-[500px] m-0 sm:m-10 bg-white shadow-gray-700 shadow-xl sm:rounded-lg flex justify-center items-center flex-1">
+    <div className="max-w-screen-lg min-h-[500px] m-0 sm:m-10 bg-white dark:bg-gray-900 shadow-gray-700 dark:shadow-gray-800 shadow-xl sm:rounded-lg flex justify-center items-center flex-1">
       <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
         <div className="flex flex-col gap-10 items-center">
           <h1 className="text-2xl xl:text-3xl font-extrabold">

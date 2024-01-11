@@ -64,7 +64,7 @@ export default function ResumeCard({
         </div>
         <Button
           outline
-          className=" bg-primary"
+          className="bg-primary"
           color="dark"
           onClick={onContinue}
         >

@@ -153,7 +153,7 @@ export default function SkillsForm() {
               {skills?.map((skill, index) => (
                 <div
                   key={index}
-                  className="bg-gray-200 dark:bg-gray-800 dark:text-gray-100 px-4 py-2 rounded-lg capitalize cursor-pointer"
+                  className=" transition-all duration-300 ease-in-out bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700  px-4 py-2 rounded-lg capitalize cursor-pointer"
                   onClick={() => onAdd(skill)}
                 >
                   {skill}

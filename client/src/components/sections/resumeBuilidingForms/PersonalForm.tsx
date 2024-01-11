@@ -8,6 +8,7 @@ import { RootState } from "../../../store/store";
 import { updateFormData } from "../../../store/slices/formDataSlice";
 import { personalFormTypes } from "../../../types/formTypes";
 import { toast } from "react-hot-toast";
+import { getDesiredDataFromPreview } from "../../../services/helper";
 
 interface countryTypes {
   name: string;
@@ -156,18 +157,23 @@ export default function PersonalForm() {
     };
     httpService
       .post(`resume/editOrDeleteUserResume`, body)
-      .then((res: any) => {
-        console.log(res, "res");
-        toast.success(res?.data?.message);
-        dispatch(
-          updateFormData({
-            key: "personal",
-            value: {
-              _id: res.data?.data?.steps[0]?._id,
-              data: res.data?.data?.steps[0]?.data,
-            },
+      .then(() => {
+        httpService
+          .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+          .then((res: any) => {
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.previewData?.steps,
+              currentStep?.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "personal",
+                value: previewData,
+              })
+            );
+            toast.success(res?.data?.message);
           })
-        );
+          .catch((err: any) => toast.error(err?.response));
       })
       .catch((err: any) => {
         toast.error(err.message);
@@ -176,7 +182,6 @@ export default function PersonalForm() {
 
   const onSubmit: SubmitHandler<personalFormTypes> = (data) => {
     if (formData?.data && formData?.data[0]?._id) {
-      console.log("truweee");
       onEdit(data);
     } else {
       const body = {
@@ -253,11 +258,11 @@ export default function PersonalForm() {
                 pattern: /^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/,
               })}
               id="email"
-              type="email"
+              type="text"
               placeholder="name@flowbite.com"
               // color={errors?.email ? "failure" : ""}
             />
-            {errors.email?.type && (
+            {errors.email && (
               <p className="text-red-600 mt-1 text-xs">
                 {errors.email?.message}
               </p>

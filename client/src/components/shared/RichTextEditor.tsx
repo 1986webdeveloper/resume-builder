@@ -14,7 +14,7 @@ export default function RichTextEditor({
   defaultData = "",
 }: ComponentTypes) {
   return (
-    <div className="App">
+    <div className="App dark:text-black">
       <CKEditor
         editor={ClassicEditor}
         data={defaultData}

@@ -12,7 +12,11 @@
       box-sizing: border-box;
     }
 
-    p,h1, h2, h3, h4{
+    p,
+    h1,
+    h2,
+    h3,
+    h4 {
       font-size: 1rem;
     }
 
@@ -75,8 +79,21 @@
     }
 
     ul li {
-      margin-left: 20px;
+      margin-left: 1rem;
       text-transform: capitalize;
+    }
+
+    .skill-content {
+      width: 50%;
+    }
+
+    .skills-list {
+      column-count: 2;
+      column-width: auto;
+    }
+
+    .skills-list li {
+      margin-bottom: 5px;
     }
 
     .experience-wrap {
@@ -156,17 +173,19 @@
           {{{content.designation.[0].customSummary}}}
           {{/if}}
         </div>
-        <hr/>
+        <hr />
       </div>
 
       {{!-- Skills section --}}
       <div class="section">
-        <h2 class="sub-title">Skills</h2>
-        <ul>
-          {{#each content.skills}}
-          <li>{{this}}</li>
-          {{/each}}
-        </ul>
+        <div class="skill-content">
+          <h2 class="sub-title">Skills</h2>
+          <ul class="skills-list">
+            {{#each content.skills}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
         <hr />
       </div>
 
@@ -195,7 +214,7 @@
         {{/each}}
         <hr />
       </div>
-      
+
       {{!-- Education section --}}
       <div class="section">
         <h2 class="sub-title">Education</h2>

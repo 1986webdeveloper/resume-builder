@@ -8,9 +8,14 @@ interface performanceTypes {
   label: string;
 }
 
+interface degreeTypes {
+  degreeType: string;
+}
+
 interface extendedType extends educationFormTypes {
   customPerformance: performanceTypes;
   customSummary: string;
+  educationData: degreeTypes;
 }
 
 interface propType {
@@ -36,7 +41,9 @@ export default function EducationCard({ data, onedit }: propType) {
               <div className="flex flex-col gap-2 shadow-lg border rounded-lg px-2 py-3">
                 <div className="flex gap-2">
                   <p className="font-bold">Education : </p>
-                  <span className="capitalize">Bachelors</span>
+                  <span className="capitalize">
+                    {ele?.educationData?.degreeType}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   <p className="font-bold">Performance : </p>
