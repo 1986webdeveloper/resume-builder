@@ -1,14 +1,14 @@
-import Input from "../../components/shared/Input";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { signupFields } from "../../config/fields";
 import { FaUserPlus } from "react-icons/fa";
-import ButtonWithIcon from "../../components/shared/ButtonWithIcon";
 import { fieldTypes } from "../../types/fieldTypes";
 import { useState } from "react";
 import { registerUser } from "../../services/auth/registerUser";
 import { toast } from "react-hot-toast";
 import bgImg from "../../assets/bg.jpg";
+import { Button } from "flowbite-react";
+import CustomInput from "../../components/shared/CustomInput";
 
 export default function Register() {
   interface Inputs {
@@ -54,31 +54,30 @@ export default function Register() {
             >
               {signupFields.map((field: fieldTypes, index: number) => (
                 <div key={index}>
-                  <Input
-                    register={register}
-                    customClass={`${index !== 0 ? "mt-4" : ""}`}
+                  <CustomInput
                     type={field.type}
+                    customClass={`${index !== 0 ? "mt-4" : ""}`}
                     placeholder={field.placeholder}
                     isRequired={field.isRequired}
                     id={field.id}
-                    color={
-                      errors[field.id as keyof Inputs] ? "border-red-500" : ""
-                    }
+                    register={register}
+                    errors={errors}
                     errorPattern={field.pattern}
+                    errMsg="Value should be valid and no empty spaces."
                   />
-                  {errors[field.id as keyof Inputs]?.type && (
-                    <p className="text-red-600 mt-1 text-xs">
-                      {errors[field.id as keyof Inputs]?.message}
-                    </p>
-                  )}
                 </div>
               ))}
-              <ButtonWithIcon
-                label="Sign Up"
-                icon={<FaUserPlus size={20} />}
-                color="bg-primary"
-                disable={isLoading}
-              />
+              <Button
+                className="w-full mt-5"
+                color="dark"
+                disabled={isLoading}
+                type="submit"
+              >
+                <span className="mr-2">
+                  <FaUserPlus size={20} />
+                </span>
+                Sign In
+              </Button>
               <p className="mt-6 text-xs text-gray-600 text-center">
                 Already have an account ?
                 <NavLink

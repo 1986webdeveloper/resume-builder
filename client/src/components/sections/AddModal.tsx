@@ -1,3 +1,4 @@
+import { Button } from "flowbite-react";
 import PropTypes, { InferProps } from "prop-types";
 
 const ComponentPropTypes = {

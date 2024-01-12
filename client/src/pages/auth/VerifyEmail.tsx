@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { passwordFields } from "../../config/fields";
 import { useForm, SubmitHandler } from "react-hook-form";
-import Input from "../../components/shared/Input";
-import ButtonWithIcon from "../../components/shared/ButtonWithIcon";
 import { FaUserPlus } from "react-icons/fa";
 import { fieldTypes } from "../../types/fieldTypes";
 import { verify } from "../../services/auth/verify";
 import { toast } from "react-hot-toast";
 import { resetPassword } from "../../services/auth/resetPassword";
 import { forgotPassword } from "../../services/auth/forgotPassword";
+import { Button } from "flowbite-react";
+import CustomInput from "../../components/shared/CustomInput";
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -96,37 +96,30 @@ export default function VerifyEmail() {
                 onSubmit={handleSubmit(onSubmit)}
               >
                 {purpose === "forgot" ? (
-                  <Input
-                    register={register}
-                    type="email"
-                    placeholder="email"
+                  <CustomInput
+                    type="text"
+                    placeholder="johndoe@gmail.com"
                     isRequired={true}
                     id="email"
-                    color={errors.email ? "border-red-500" : ""}
+                    register={register}
+                    errors={errors}
                     errorPattern={/^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/}
+                    errMsg="Value should be valid and no empty spaces."
                   />
                 ) : (
                   passwordFields.map((field: fieldTypes, index: number) => (
                     <div key={index}>
-                      <Input
-                        register={register}
-                        customClass={`${index !== 0 ? "mt-4" : ""}`}
+                      <CustomInput
                         type={field.type}
+                        customClass={`${index !== 0 ? "mt-4" : ""}`}
                         placeholder={field.placeholder}
                         isRequired={field.isRequired}
                         id={field.id}
-                        color={
-                          errors[field.id as keyof Inputs]
-                            ? "border-red-500"
-                            : ""
-                        }
+                        register={register}
+                        errors={errors}
                         errorPattern={field.pattern}
+                        errMsg="Value should be valid and no empty spaces."
                       />
-                      {errors[field.id as keyof Inputs]?.type && (
-                        <p className="text-red-600 mt-1 text-xs">
-                          {errors[field.id as keyof Inputs]?.message}
-                        </p>
-                      )}
                     </div>
                   ))
                 )}
@@ -135,12 +128,17 @@ export default function VerifyEmail() {
                     Password Did not match.
                   </p>
                 )}
-                <ButtonWithIcon
-                  label="Continue"
-                  icon={<FaUserPlus size={20} />}
-                  color="bg-primary"
-                  disable={isLoading}
-                />
+                <Button
+                  className="w-full mt-5"
+                  color="dark"
+                  disabled={isLoading}
+                  type="submit"
+                >
+                  <span className="mr-2">
+                    <FaUserPlus size={20} />
+                  </span>
+                  Continue
+                </Button>
               </form>
             ) : (
               <h1>Verifying Email....</h1>

@@ -162,7 +162,12 @@ export default function SkillsForm() {
             </div>
           </div>
           <div className="mt-auto self-center">
-            <Button color="success" className="px-9" onClick={onContinue}>
+            <Button
+              color="success"
+              className="px-9"
+              onClick={onContinue}
+              disabled={addedSkills.length > 0 ? false : true}
+            >
               Continue
             </Button>
           </div>

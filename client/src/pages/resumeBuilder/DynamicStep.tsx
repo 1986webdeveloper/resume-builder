@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import PersonalForm from "../../components/sections/resumeBuilidingForms/PersonalForm";
 import DesignationForm from "../../components/sections/resumeBuilidingForms/DesignationForm";
 import ExperienceForm from "../../components/sections/resumeBuilidingForms/ExperienceForm";
@@ -23,8 +22,6 @@ interface stepsTypes {
 }
 
 export default function DynamicStep() {
-  const location = useLocation();
-  const sectionId = location.state?.id;
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
   const [steps, setSteps] = useState([] as stepsTypes[]);
@@ -72,7 +69,6 @@ export default function DynamicStep() {
       })
       .catch((err) => {
         toast.error(err.response);
-        console.log("ERROR ", err);
       });
   };
 
@@ -105,9 +101,7 @@ export default function DynamicStep() {
           </div>
           {steps && (
             <div className="mt-5">
-              {currentStep.slug === "personal" && (
-                <PersonalForm id={sectionId} />
-              )}
+              {currentStep.slug === "personal" && <PersonalForm />}
               {currentStep.slug === "designation" && <DesignationForm />}
               {currentStep.slug === "experience" && <ExperienceForm />}
               {currentStep.slug === "education" && <EducationForm />}

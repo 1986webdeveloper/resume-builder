@@ -57,7 +57,7 @@ export const httpService = {
 const addAuthorizationHeader = (
   config?: AxiosRequestConfig
 ): AxiosRequestConfig => {
-  const token = localStorage.getItem("token"); // Replace with your token retrieval logic
+  const token = localStorage.getItem("token");
 
   if (token) {
     return {

@@ -11,6 +11,8 @@ import { RootState } from "../../../store/store";
 import { designationFormTypes } from "../../../types/formTypes";
 import { updateFormData } from "../../../store/slices/formDataSlice";
 import { getDesiredDataFromPreview } from "../../../services/helper";
+import CustomSelect from "../../shared/CustomSelect";
+import EmptyState from "../../shared/EmptyState";
 
 interface designationTypes {
   _id: string;
@@ -184,33 +186,18 @@ export default function DesignationForm() {
         className="min-w-[25%] max-w-[26%] shadow-xl px-6 py-8 rounded-lg border self-center justify-center"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="designation" value="Select your designation" />
-          </div>
-          <Select
-            id="designation"
-            defaultValue=""
-            {...register("designation", {
-              required: {
-                value: true,
-                message: "This field is required",
-              },
-              pattern: {
-                value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                message: "There should be no empty spaces.",
-              },
-            })}
-            // color={errors?.designation ? "failure" : ""}
-          >
-            <option value="" disabled>
-              Select Designation
-            </option>
-            {allowedDesignations.map((designation, index) => (
-              <option key={index}>{designation.name}</option>
-            ))}
-          </Select>
-        </div>
+        <CustomSelect
+          label="Select your designation"
+          isRequired={true}
+          id="designation"
+          register={register}
+          errors={errors}
+          defaultValue=""
+          initialOption="Select Designation"
+          optionsData={allowedDesignations}
+          optionsKey="name"
+          disabled={false}
+        />
         <div className="mt-3">
           <div className="mb-2 block">
             <Label value="Summary" />
@@ -243,14 +230,7 @@ export default function DesignationForm() {
             ))}
           </div>
         ) : (
-          <div className="w-full h-full flex justify-center items-center">
-            <div className="flex flex-col gap-2 items-center">
-              <BsDatabaseExclamation color="gray" size={60} />
-              <p className="text-sm text-center ml-2 text-gray-400">
-                No Summaries to show.
-              </p>
-            </div>
-          </div>
+          <EmptyState description="No Summaries to show." />
         )}
       </div>
     </div>

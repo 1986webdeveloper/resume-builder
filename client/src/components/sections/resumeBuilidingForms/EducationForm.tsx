@@ -12,6 +12,10 @@ import { RootState } from "../../../store/store";
 import { educationFormTypes } from "../../../types/formTypes";
 import { getDesiredDataFromPreview } from "../../../services/helper";
 import { updateFormData } from "../../../store/slices/formDataSlice";
+import CustomSelect from "../../shared/CustomSelect";
+import CustomInput from "../../shared/CustomInput";
+import CustomDate from "../../shared/CustomDate";
+import EmptyState from "../../shared/EmptyState";
 
 interface summaryTypes {
   _id: string;
@@ -57,7 +61,6 @@ export default function EducationForm() {
   const [educationData, setEducationData] = useState(
     formData.data || ([] as educationFormTypes[])
   );
-  console.log(educationData, "educationData");
   const [onEditDataId, setOnEditDataId] = useState(null as number | null);
   const [educations, setEducations] = useState([] as educationtypes[]);
   const [selectedEducation, setSelectedEducation] = useState(
@@ -161,7 +164,6 @@ export default function EducationForm() {
   };
 
   const onEdit = (data: educationFormTypes, id: number) => {
-    console.log(id, "onedit id");
     setOnEditDataId(id);
     setValue("instituteName", data.instituteName);
     setValue("from", data.from);
@@ -280,147 +282,69 @@ export default function EducationForm() {
           className="min-w-[25%] max-w-[26%] h-[500px] overflow-y-scroll shadow-xl px-6 py-8 rounded-lg border self-center flex flex-col gap-2"
           onSubmit={handleSubmit(onAdd)}
         >
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="education" value="Select Degree" />
-            </div>
-            <Select
-              id="education"
-              defaultValue=""
-              {...register("education", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              // color={errors?.education ? "failure" : ""}
-            >
-              <option value="" disabled>
-                Select Education
-              </option>
-              {educations.map((education) => (
-                <option key={education._id}>{education.degreeType}</option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="instituteName" value="Institute Name" />
-            </div>
-            <TextInput
-              {...register("instituteName", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-              })}
-              id="instituteName"
-              type="text"
-              // color={errors?.instituteName ? "failure" : ""}
-            />
-            {errors?.instituteName && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.instituteName?.message as string}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="from" value="From" />
-            </div>
-            <input
-              type="date"
-              {...register("from", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 `}
-            />
-            {errors.from?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.from?.message as string}
-              </p>
-            )}
-          </div>
+          <CustomSelect
+            label="Select Degree"
+            isRequired={true}
+            id="education"
+            register={register}
+            errors={errors}
+            defaultValue=""
+            initialOption="Select Education"
+            optionsData={educations}
+            optionsKey="degreeType"
+            disabled={false}
+          />
+          <CustomInput
+            type="text"
+            label="Institute Name"
+            isRequired={true}
+            id="instituteName"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            errMsg="There should be no empty spaces."
+          />
+          <CustomDate
+            label="From"
+            isRequired={true}
+            id="from"
+            register={register}
+            errors={errors}
+            disabled={false}
+          />
           <div className="flex items-center gap-2">
             <Checkbox id="present" {...register("present")} />
             <Label htmlFor="present">Currently Studying ?</Label>
           </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="to" value="To" />
-            </div>
-            <input
-              type="date"
-              {...register("to")}
-              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 ${
-                isCurrentlyWorking ? "border-gray-400 text-gray-400" : ""
-              }`}
-              disabled={isCurrentlyWorking}
-            />
-            {errors.to?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors?.to?.message as string}
-              </p>
-            )}
-          </div>
+          <CustomDate
+            label="To"
+            isRequired={true}
+            id="to"
+            register={register}
+            errors={errors}
+            disabled={isCurrentlyWorking}
+          />
           <div className="flex gap-2">
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="performance" value="Performance" />
-              </div>
-              <TextInput
-                {...register("performance", {
-                  required: {
-                    value: true,
-                    message: "This field is required",
-                  },
-                  pattern: {
-                    value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                    message: "There should be no empty spaces.",
-                  },
-                })}
-                id="performance"
-                type="text"
-                // color={errors?.performance ? "failure" : ""}
-              />
-              {errors?.performance && (
-                <p className="text-red-600 mt-1 text-xs">
-                  {errors.performance?.message as string}
-                </p>
-              )}
-            </div>
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="label" value="Label" />
-              </div>
-              <TextInput
-                {...register("label", {
-                  required: {
-                    value: true,
-                    message: "This field is required",
-                  },
-                  pattern: {
-                    value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                    message: "There should be no empty spaces.",
-                  },
-                })}
-                id="label"
-                type="text"
-                // color={errors?.label ? "failure" : ""}
-              />
-              {errors?.label && (
-                <p className="text-red-600 mt-1 text-xs">
-                  {errors.label?.message as string}
-                </p>
-              )}
-            </div>
+            <CustomInput
+              type="text"
+              label="Performance"
+              isRequired={true}
+              id="performance"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+              errMsg="There should be no empty spaces."
+            />
+            <CustomInput
+              type="text"
+              label="Performance Label"
+              isRequired={true}
+              id="label"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+              errMsg="There should be no empty spaces."
+            />
           </div>
           <div className="mt-3">
             <div className="mb-2 block">
@@ -476,14 +400,7 @@ export default function EducationForm() {
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex justify-center items-center">
-              <div className="flex flex-col gap-2 items-center">
-                <BsDatabaseExclamation color="gray" size={60} />
-                <p className="text-sm text-center ml-2 text-gray-400">
-                  No Summaries to show.
-                </p>
-              </div>
-            </div>
+            <EmptyState description="No Summaries to show." />
           )}
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">

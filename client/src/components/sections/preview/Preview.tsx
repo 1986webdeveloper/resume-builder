@@ -61,7 +61,6 @@ export default function Preview({ steps }: propType) {
         setOpenModal(true);
       })
       .catch((err) => {
-        console.log(err);
         toast.error(err?.response);
       });
   };
@@ -82,16 +81,13 @@ export default function Preview({ steps }: propType) {
 
       // Remove the link from the document
       document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
-    }
+    } catch (error) {}
   };
 
   const handleDownload = () => {
     httpService
       .get(`resume/resumeInfo?resumeId=${currentStep.resumeId}&download=true`)
       .then((res: any) => {
-        console.log(res);
         downloadPdf(res?.data?.data?.url);
         setOpenModal(false);
         toast.success("Download Successful");
@@ -131,7 +127,12 @@ export default function Preview({ steps }: propType) {
           </Button>
         </div>
       </div>
-      <Modal show={openModal} size="2xl" onClose={() => setOpenModal(false)}>
+      <Modal
+        show={openModal}
+        size="2xl"
+        onClose={() => setOpenModal(false)}
+        className="transition-all delay-300 ease-in-out"
+      >
         <Modal.Body>
           <div className="p-3 mx-auto">
             <iframe

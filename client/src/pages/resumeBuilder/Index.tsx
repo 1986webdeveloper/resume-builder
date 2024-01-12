@@ -13,6 +13,7 @@ import {
 import { BsDatabaseExclamation } from "react-icons/bs";
 import Modal from "../../components/sections/DeleteModal";
 import { clearFormData, setFormData } from "../../store/slices/formDataSlice";
+import EmptyState from "../../components/shared/EmptyState";
 
 interface resumeType {
   full_name: string;
@@ -116,14 +117,7 @@ export default function ResumeBuilder() {
             ))}
           </div>
         ) : (
-          <div className="w-full min-h-[650px] flex justify-center items-center">
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <BsDatabaseExclamation color="gray" size={60} />
-              <p className="text-sm text-center ml-2 text-gray-400">
-                No Resumes to show.
-              </p>
-            </div>
-          </div>
+          <EmptyState description="No Resume to show." />
         )}
       </div>
       {isOpen && (

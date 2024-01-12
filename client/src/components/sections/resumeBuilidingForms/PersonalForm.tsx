@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
-import { Button, Label, Select, TextInput } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -9,6 +9,9 @@ import { updateFormData } from "../../../store/slices/formDataSlice";
 import { personalFormTypes } from "../../../types/formTypes";
 import { toast } from "react-hot-toast";
 import { getDesiredDataFromPreview } from "../../../services/helper";
+import CustomInput from "../../shared/CustomInput";
+import CustomSelect from "../../shared/CustomSelect";
+import CustomDate from "../../shared/CustomDate";
 
 interface countryTypes {
   name: string;
@@ -223,198 +226,93 @@ export default function PersonalForm() {
     >
       <div className="flex gap-5 w-full">
         <div className="flex flex-col gap-6 w-full">
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="full_name" value="Full Name" />
-            </div>
-            <TextInput
-              {...register("full_name", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-              })}
-              id="full_name"
-              type="text"
-              // color={errors?.full_name ? "failure" : ""}
-            />
-            {errors?.full_name && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.full_name?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="email" value="Email" />
-            </div>
-            <TextInput
-              {...register("email", {
-                required: true,
-                pattern: /^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/,
-              })}
-              id="email"
-              type="text"
-              placeholder="name@flowbite.com"
-              // color={errors?.email ? "failure" : ""}
-            />
-            {errors.email && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.email?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="country" value="Select your country" />
-            </div>
-            <Select
-              id="country"
-              {...register("country", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              defaultValue={initialCountry?.name || ""}
-              // color={errors?.country ? "failure" : ""}
-            >
-              <option value="" disabled>
-                Select Country
-              </option>
-              {allCountries.map((country: countryTypes) => (
-                <option key={country.name}>{country.name}</option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="state" value="Select your State" />
-            </div>
-            <Select
-              id="state"
-              disabled={watch("country") ? false : true}
-              {...register("state", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              defaultValue={initialState?.name || ""}
-              // color={errors?.state ? "failure" : ""}
-            >
-              <option value="" disabled>
-                Select State
-              </option>
-              {allStates.map((state: stateTypes) => (
-                <option key={state.name}>{state.name}</option>
-              ))}
-            </Select>
-          </div>
+          <CustomInput
+            type="text"
+            label="Full Name"
+            isRequired={true}
+            id="full_name"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            errMsg="There should be no empty spaces."
+          />
+          <CustomInput
+            type="text"
+            label="Email"
+            isRequired={true}
+            id="email"
+            placeholder="johndoe@gmail.com"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/}
+            errMsg="Please type valid email address."
+          />
+          <CustomSelect
+            label="Select Country"
+            isRequired={true}
+            id="country"
+            register={register}
+            errors={errors}
+            defaultValue={initialCountry?.name}
+            initialOption="Select Country"
+            optionsData={allCountries}
+            optionsKey="name"
+            disabled={false}
+          />
+          <CustomSelect
+            label="Select State"
+            isRequired={true}
+            id="state"
+            register={register}
+            errors={errors}
+            defaultValue={initialState?.name}
+            initialOption="Select State"
+            optionsData={allStates}
+            optionsKey="name"
+            disabled={watch("country") ? false : true}
+          />
         </div>
         <div className="flex flex-col gap-6 w-full">
-          <div className="w-full">
-            <div className="mb-2 block">
-              <Label htmlFor="city" value="Select your City" />
-            </div>
-            <Select
-              id="city"
-              disabled={watch("state") ? false : true}
-              {...register("city", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              defaultValue={initialCity}
-              // color={errors?.city ? "failure" : ""}
-            >
-              <option value="" disabled>
-                Select City
-              </option>
-              {allCities.map((city) => (
-                <option key={city.name}>{city.name}</option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="mobileNo" value="Mobile No" />
-            </div>
-            <TextInput
-              {...register("mobileNo", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-                minLength: {
-                  value: 10,
-                  message: "Mobile No should be 10 digits",
-                },
-              })}
-              id="mobileNo"
-              type="number"
-              // color={errors?.mobileNo ? "failure" : ""}
-            />
-            {errors.mobileNo?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.mobileNo?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="dob" value="Date of birth" />
-            </div>
-            <input
-              type="date"
-              {...register("dob", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              className={`rounded-lg w-full bg-white dark:bg-gray-700 dark:text-gray-100 `}
-            />
-            {errors.dob?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.dob?.message as string}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="address" value="Address" />
-            </div>
-            <TextInput
-              {...register("address", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-              })}
-              id="address"
-              type="text"
-              // color={errors?.address ? "failure" : ""}
-            />
-            {errors.address?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.address?.message}
-              </p>
-            )}
-          </div>
+          <CustomSelect
+            label="Select City"
+            isRequired={true}
+            id="city"
+            register={register}
+            errors={errors}
+            defaultValue={initialCity}
+            initialOption="Select City"
+            optionsData={allCities}
+            optionsKey="name"
+            disabled={watch("state") ? false : true}
+          />
+          <CustomInput
+            type="number"
+            label="Mobile Number"
+            isRequired={true}
+            id="mobileNo"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            errMsg="There should be no empty spaces."
+          />
+          <CustomDate
+            label="Date of birth"
+            isRequired={true}
+            id="dob"
+            register={register}
+            errors={errors}
+            disabled={false}
+          />
+          <CustomInput
+            type="text"
+            label="Address"
+            isRequired={true}
+            id="address"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            errMsg="There should be no empty spaces."
+          />
         </div>
       </div>
       <Button type="submit" color="success" className="px-10 mt-9 mx-auto">
