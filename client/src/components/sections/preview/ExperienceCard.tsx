@@ -27,8 +27,11 @@ export default function ExperienceCard({ data, onedit }: propType) {
             <MdEdit size={18} />
           </span>
           <div className="flex flex-col gap-2 mt-4 max-h-[200px] overflow-auto ">
-            {data?.map((ele) => (
-              <div className="flex flex-col gap-2 shadow-lg border rounded-lg px-2 py-3">
+            {data?.map((ele, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-2 shadow-lg border rounded-lg px-2 py-3"
+              >
                 <div className="flex gap-2">
                   <p className="font-bold">Company : </p>
                   <span className="capitalize">{ele.companyName}</span>

@@ -3,7 +3,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../shared/RichTextEditor";
 import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
-import { BsDatabaseExclamation } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { httpService } from "../../../services/https";
 import { toast } from "react-hot-toast";
@@ -17,6 +16,16 @@ import CustomDate from "../../shared/CustomDate";
 import CustomInput from "../../shared/CustomInput";
 import CustomSelect from "../../shared/CustomSelect";
 import EmptyState from "../../shared/EmptyState";
+
+interface extendedExperienceTypes extends experienceFormTypes {
+  _id: string;
+  customSummary: string;
+  experienceData: experienceTypes;
+}
+
+interface experienceTypes {
+  name: string;
+}
 
 interface summaryTypes {
   _id: string;
@@ -41,7 +50,7 @@ export default function ExperienceForm() {
   const [textAreaData, setTextAreaData] = useState("");
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
   const [experienceData, setExperienceData] = useState(formData?.data || []);
-  const [onEditDataId, setOnEditDataId] = useState(null as number | null);
+  const [onEditDataId, setOnEditDataId] = useState(null as string | null);
   const [allowedDesignations, setAllowedDesignations] = useState(
     [] as designationTypes[]
   );
@@ -121,14 +130,6 @@ export default function ExperienceForm() {
           })
           .catch((err) => toast.error(err?.response));
       } else {
-        setExperienceData((prev) =>
-          prev.map((exp) => {
-            if (exp._id === onEditDataId) {
-              return { ...data, summary: textAreaData };
-            }
-            return exp;
-          })
-        );
         const body = {
           resumeId: currentStep.resumeId,
           elementId: onEditDataId,
@@ -158,7 +159,20 @@ export default function ExperienceForm() {
                     value: previewData,
                   })
                 );
+                setNextStepInfo({
+                  route: `${res.data?.data?.currentStep?.slug}`,
+                  id: res.data?.data?.currentStep?.sectionID,
+                  title: res.data?.data?.currentStep?.title,
+                });
                 toast.success(res?.data?.message);
+                setExperienceData((prev: extendedExperienceTypes[]) =>
+                  prev.map((exp: extendedExperienceTypes) => {
+                    if (exp._id === onEditDataId) {
+                      return { ...data, summary: textAreaData };
+                    }
+                    return exp;
+                  })
+                );
               })
               .catch((err: any) => toast.error(err?.response));
           })
@@ -170,7 +184,7 @@ export default function ExperienceForm() {
     }
   };
 
-  const onEdit = (data: experienceFormTypes, id: number) => {
+  const onEdit = (data: extendedExperienceTypes, id: string) => {
     setOnEditDataId(id);
     setValue("companyName", data.companyName);
     setValue("from", data.from);
@@ -180,11 +194,6 @@ export default function ExperienceForm() {
   };
 
   const onDelete = (id: number) => {
-    setExperienceData((prev: experienceFormTypes[]) =>
-      prev.filter((exp: any) => {
-        return exp._id !== id;
-      })
-    );
     const body = {
       resumeId: currentStep.resumeId,
       elementId: id,
@@ -194,21 +203,31 @@ export default function ExperienceForm() {
     };
     httpService
       .post(`resume/editOrDeleteUserResume`, body)
-      .then((res: any) => {
-        toast.success(res?.data?.message);
-        const previewData = getDesiredDataFromPreview(
-          res.data?.data?.steps,
-          currentStep.sectionID
-        );
-        dispatch(
-          updateFormData({
-            key: "experience",
-            value: previewData,
+      .then(() => {
+        httpService
+          .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+          .then((res: any) => {
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.previewData?.steps,
+              currentStep?.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "experience",
+                value: previewData,
+              })
+            );
+            toast.success(res?.data?.message);
+            setExperienceData((prev: experienceFormTypes[]) =>
+              prev.filter((exp: any) => {
+                return exp._id !== id;
+              })
+            );
           })
-        );
+          .catch((err: any) => toast.error(err?.response));
       })
       .catch((err) => {
-        toast.error(err?.error);
+        toast.error(err?.message);
       });
   };
 
@@ -291,7 +310,7 @@ export default function ExperienceForm() {
           </div>
           <CustomDate
             label="To"
-            isRequired={true}
+            isRequired={isCurrentlyWorking}
             id="to"
             register={register}
             errors={errors}

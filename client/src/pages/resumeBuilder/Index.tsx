@@ -6,13 +6,9 @@ import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { Button } from "flowbite-react";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import {
-  clearSteps,
-  setCurrentStep,
-} from "../../store/slices/currentStepSlice";
-import { BsDatabaseExclamation } from "react-icons/bs";
+import { clearSteps } from "../../store/slices/currentStepSlice";
 import Modal from "../../components/sections/DeleteModal";
-import { clearFormData, setFormData } from "../../store/slices/formDataSlice";
+import { clearFormData } from "../../store/slices/formDataSlice";
 import EmptyState from "../../components/shared/EmptyState";
 
 interface resumeType {
@@ -106,6 +102,7 @@ export default function ResumeBuilder() {
           <div className="grid lg:grid-cols-5 md:grid-cols-4 grikd-cols-3 gap-6 mt-5">
             {allResume.map((resume: resumeType) => (
               <ResumeCard
+                key={resume._id}
                 title={resume.full_name}
                 email={resume.email}
                 phone={resume.mobileNo}

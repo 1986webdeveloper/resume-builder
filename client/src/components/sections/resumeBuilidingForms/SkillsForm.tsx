@@ -25,10 +25,20 @@ export default function SkillsForm() {
       .get(`skills/getAllSkills?searchText=${query}`)
       .then((res: any) => {
         if (res.status === 200) {
-          const modified = res.data?.data.map((data: any) => {
+          let modified = res.data?.data.map((data: any) => {
             return `${data.name}`;
           });
-          setSkills(modified);
+          if (addedSkills.length > 0) {
+            let newArr: Array<string> = [];
+            modified.forEach((skill: string) => {
+              if (!addedSkills.includes(skill)) {
+                newArr.push(skill);
+              }
+            });
+            setSkills(newArr);
+          } else {
+            setSkills(modified);
+          }
         }
       });
   };
@@ -69,25 +79,36 @@ export default function SkillsForm() {
         const body = {
           resumeId: currentStep.resumeId,
           sectionId: formData?._id,
-          active: true,
           data: {
             skills: addedSkills,
           },
         };
         httpService
           .post(`resume/editOrDeleteUserResume`, body)
-          .then((res: any) => {
-            toast.success(res?.data?.message);
-            const previewData = getDesiredDataFromPreview(
-              res.data?.data?.steps,
-              currentStep.sectionID
-            );
-            dispatch(
-              updateFormData({
-                key: "skills",
-                value: previewData,
+          .then(() => {
+            httpService
+              .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+              .then((res: any) => {
+                const previewData = getDesiredDataFromPreview(
+                  res.data?.data?.previewData?.steps,
+                  currentStep?.sectionID
+                );
+                dispatch(
+                  updateFormData({
+                    key: "skills",
+                    value: previewData,
+                  })
+                );
+                dispatch(
+                  setCurrentStep({
+                    slug: `${res.data?.data?.currentStep?.slug}`,
+                    sectionID: res.data?.data?.currentStep?.sectionID,
+                    title: res.data?.data?.currentStep?.title,
+                  })
+                );
+                toast.success(res?.data?.message);
               })
-            );
+              .catch((err: any) => toast.error(err?.response));
           })
           .catch((err) => {
             toast.error(err?.error);

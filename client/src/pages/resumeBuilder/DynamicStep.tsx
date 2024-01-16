@@ -13,6 +13,7 @@ import Preview from "../../components/sections/preview/Preview";
 import { setFormData } from "../../store/slices/formDataSlice";
 import { toast } from "react-hot-toast";
 import { BsDatabaseExclamation } from "react-icons/bs";
+import { Button } from "flowbite-react";
 
 interface stepsTypes {
   sectionID: string;
@@ -24,9 +25,11 @@ interface stepsTypes {
 export default function DynamicStep() {
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
+  const formData: any = useSelector((state: RootState) => state.formData);
   const [steps, setSteps] = useState([] as stepsTypes[]);
   const [isLoading, setIsLoading] = useState(false);
   const resumeId = localStorage.getItem("resumeId") || "";
+  const [previewStep, setPreviewStep] = useState({});
 
   function sortByOrder(arr: stepsTypes[]) {
     const sortedArray = arr.slice().sort((a, b) => a.order - b.order);
@@ -53,6 +56,13 @@ export default function DynamicStep() {
             resumeId: resumeId,
           })
         );
+        if (res.data?.data?.currentStep?.slug === "preview") {
+          setPreviewStep({
+            slug: res.data?.data?.currentStep?.slug,
+            sectionID: res.data?.data?.currentStep?.sectionID,
+            title: res.data?.data?.currentStep?.title,
+          });
+        }
         if (res.data?.data?.previewData) {
           // Dispatch the action of setting the filled steps's data into global state.
           let previewArr = res.data?.data?.previewData?.steps?.map(
@@ -109,6 +119,21 @@ export default function DynamicStep() {
               {currentStep.slug === "preview" && <Preview steps={steps} />}
             </div>
           )}
+          {Object.keys(formData).every(
+            (key) =>
+              formData.hasOwnProperty(key) &&
+              formData[key].hasOwnProperty("data") &&
+              formData[key].data !== ""
+          ) &&
+            currentStep.slug !== "preview" && (
+              <Button
+                color="failure"
+                className="px-12 mt-3 mx-auto"
+                onClick={() => dispatch(setCurrentStep(previewStep))}
+              >
+                Cancel
+              </Button>
+            )}
         </>
       )}
     </div>

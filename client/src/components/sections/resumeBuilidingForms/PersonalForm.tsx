@@ -175,6 +175,13 @@ export default function PersonalForm() {
               })
             );
             toast.success(res?.data?.message);
+            dispatch(
+              setCurrentStep({
+                slug: res.data?.data?.currentStep?.slug,
+                sectionID: res.data?.data?.currentStep?.sectionID,
+                title: res.data?.data?.currentStep?.title,
+              })
+            );
           })
           .catch((err: any) => toast.error(err?.response));
       })
@@ -220,104 +227,111 @@ export default function PersonalForm() {
   };
 
   return (
-    <form
-      className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div className="flex gap-5 w-full">
-        <div className="flex flex-col gap-6 w-full">
-          <CustomInput
-            type="text"
-            label="Full Name"
-            isRequired={true}
-            id="full_name"
-            register={register}
-            errors={errors}
-            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-            errMsg="There should be no empty spaces."
-          />
-          <CustomInput
-            type="text"
-            label="Email"
-            isRequired={true}
-            id="email"
-            placeholder="johndoe@gmail.com"
-            register={register}
-            errors={errors}
-            errorPattern={/^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/}
-            errMsg="Please type valid email address."
-          />
-          <CustomSelect
-            label="Select Country"
-            isRequired={true}
-            id="country"
-            register={register}
-            errors={errors}
-            defaultValue={initialCountry?.name}
-            initialOption="Select Country"
-            optionsData={allCountries}
-            optionsKey="name"
-            disabled={false}
-          />
-          <CustomSelect
-            label="Select State"
-            isRequired={true}
-            id="state"
-            register={register}
-            errors={errors}
-            defaultValue={initialState?.name}
-            initialOption="Select State"
-            optionsData={allStates}
-            optionsKey="name"
-            disabled={watch("country") ? false : true}
-          />
+    <>
+      <form
+        className="mx-auto max-w-4xl mt-10 shadow-xl px-6 py-8 rounded-lg border"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <div className="flex gap-5 w-full">
+          <div className="flex flex-col gap-6 w-full">
+            <CustomInput
+              type="text"
+              label="Full Name"
+              isRequired={true}
+              id="full_name"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+              errMsg="There should be no empty spaces."
+            />
+            <CustomInput
+              type="text"
+              label="Email"
+              isRequired={true}
+              id="email"
+              placeholder="johndoe@gmail.com"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+@[^\s]+\.[a-zA-Z]{2,}$/}
+              errMsg="Please type valid email address."
+            />
+            <CustomSelect
+              label="Select Country"
+              isRequired={true}
+              id="country"
+              register={register}
+              errors={errors}
+              defaultValue={initialCountry?.name}
+              initialOption="Select Country"
+              optionsData={allCountries}
+              optionsKey="name"
+              disabled={false}
+            />
+            <CustomSelect
+              label="Select State"
+              isRequired={true}
+              id="state"
+              register={register}
+              errors={errors}
+              defaultValue={initialState?.name}
+              initialOption="Select State"
+              optionsData={allStates}
+              optionsKey="name"
+              disabled={watch("country") ? false : true}
+            />
+          </div>
+          <div className="flex flex-col gap-6 w-full">
+            <CustomSelect
+              label="Select City"
+              isRequired={true}
+              id="city"
+              register={register}
+              errors={errors}
+              defaultValue={initialCity}
+              initialOption="Select City"
+              optionsData={allCities}
+              optionsKey="name"
+              disabled={watch("state") ? false : true}
+            />
+            <CustomInput
+              type="number"
+              label="Mobile Number"
+              isRequired={true}
+              id="mobileNo"
+              register={register}
+              errors={errors}
+              errorPattern={/^\d{10}$/}
+              errMsg="Mobile number should be valid."
+            />
+            <CustomDate
+              label="Date of birth"
+              isRequired={true}
+              id="dob"
+              register={register}
+              errors={errors}
+              disabled={false}
+            />
+            <CustomInput
+              type="text"
+              label="Address"
+              isRequired={true}
+              id="address"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+              errMsg="There should be no empty spaces."
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-6 w-full">
-          <CustomSelect
-            label="Select City"
-            isRequired={true}
-            id="city"
-            register={register}
-            errors={errors}
-            defaultValue={initialCity}
-            initialOption="Select City"
-            optionsData={allCities}
-            optionsKey="name"
-            disabled={watch("state") ? false : true}
-          />
-          <CustomInput
-            type="number"
-            label="Mobile Number"
-            isRequired={true}
-            id="mobileNo"
-            register={register}
-            errors={errors}
-            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-            errMsg="There should be no empty spaces."
-          />
-          <CustomDate
-            label="Date of birth"
-            isRequired={true}
-            id="dob"
-            register={register}
-            errors={errors}
-            disabled={false}
-          />
-          <CustomInput
-            type="text"
-            label="Address"
-            isRequired={true}
-            id="address"
-            register={register}
-            errors={errors}
-            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-            errMsg="There should be no empty spaces."
-          />
-        </div>
-      </div>
-      <Button type="submit" color="success" className="px-10 mt-9 mx-auto">
-        Continue
-      </Button>
-    </form>
+        <Button type="submit" color="success" className="px-10 mt-9 mx-auto">
+          Continue
+        </Button>
+      </form>
+      {/* {formData?.data && formData?.data[0]?._id && (
+        <Button color="failure" className="px-12 mt-9 ml-auto">
+          Cancel
+        </Button>
+      )} */}
+    </>
   );
 }

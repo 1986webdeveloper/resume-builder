@@ -22,8 +22,8 @@ export default function SkillCard({ data, onedit }: propTypes) {
             <MdEdit size={18} />
           </span>
           <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-2 mt-5 max-h-[200px] overflow-auto ">
-            {data?.map((skill) => (
-              <Badge name={skill} />
+            {data?.map((skill, index) => (
+              <Badge key={index} name={skill} />
             ))}
           </div>
         </>

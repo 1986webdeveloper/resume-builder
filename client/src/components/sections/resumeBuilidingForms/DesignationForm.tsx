@@ -131,6 +131,13 @@ export default function DesignationForm() {
                 value: previewData,
               })
             );
+            dispatch(
+              setCurrentStep({
+                slug: res.data?.data?.currentStep?.slug,
+                sectionID: res.data?.data?.currentStep?.sectionID,
+                title: res.data?.data?.currentStep?.title,
+              })
+            );
             toast.success(res?.data?.message);
           })
           .catch((err: any) => toast.error(err?.response));

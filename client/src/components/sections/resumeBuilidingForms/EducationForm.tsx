@@ -1,9 +1,8 @@
-import { Button, Checkbox, Label, Select, TextInput } from "flowbite-react";
+import { Button, Checkbox, Label } from "flowbite-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../shared/RichTextEditor";
 import { useEffect, useState } from "react";
 import { FaPlusCircle, FaTrash } from "react-icons/fa";
-import { BsDatabaseExclamation } from "react-icons/bs";
 import { httpService } from "../../../services/https";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,6 +19,13 @@ import EmptyState from "../../shared/EmptyState";
 interface summaryTypes {
   _id: string;
   summary: string;
+}
+
+interface extendedEducationTypes extends educationFormTypes {
+  _id: string;
+  educationData: educationtypes;
+  customPerformance: performanceTypes;
+  customSummary: string;
 }
 
 interface educationtypes {
@@ -59,9 +65,10 @@ export default function EducationForm() {
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
   const [performances, setPerformances] = useState([] as performanceTypes[]);
   const [educationData, setEducationData] = useState(
-    formData.data || ([] as educationFormTypes[])
+    formData.data || ([] as extendedEducationTypes[])
   );
-  const [onEditDataId, setOnEditDataId] = useState(null as number | null);
+
+  const [onEditDataId, setOnEditDataId] = useState(null as string | null);
   const [educations, setEducations] = useState([] as educationtypes[]);
   const [selectedEducation, setSelectedEducation] = useState(
     {} as educationtypes
@@ -111,14 +118,6 @@ export default function EducationForm() {
           })
           .catch((err) => toast.error(err?.response));
       } else {
-        setEducationData((prev: educationFormTypes[]) =>
-          prev.map((edu: educationFormTypes, index: number) => {
-            if (edu._id === onEditDataId) {
-              return { ...data, summary: textAreaData };
-            }
-            return edu;
-          })
-        );
         const eduObj = educations.find(
           (edu) => edu.degreeType === data.education
         );
@@ -151,7 +150,20 @@ export default function EducationForm() {
                     value: previewData,
                   })
                 );
+                setNextStepInfo({
+                  route: `${res.data?.data?.currentStep?.slug}`,
+                  id: res.data?.data?.currentStep?.sectionID,
+                  title: res.data?.data?.currentStep?.title,
+                });
                 toast.success(res?.data?.message);
+                setEducationData((prev: extendedEducationTypes[]) =>
+                  prev.map((edu: extendedEducationTypes) => {
+                    if (edu._id === onEditDataId) {
+                      return { ...data, summary: textAreaData };
+                    }
+                    return edu;
+                  })
+                );
               })
               .catch((err: any) => toast.error(err?.response));
           })
@@ -163,21 +175,18 @@ export default function EducationForm() {
     }
   };
 
-  const onEdit = (data: educationFormTypes, id: number) => {
+  const onEdit = (data: extendedEducationTypes, id: string) => {
     setOnEditDataId(id);
+    setValue("education", data.educationData?.degreeType);
     setValue("instituteName", data.instituteName);
     setValue("from", data.from);
     setValue("to", data.to);
-    setValue("performance", data.performance);
+    setValue("performance", data.customPerformance?.value);
+    setValue("label", data.customPerformance?.label);
     setTextAreaData(data.customSummary);
   };
 
-  const onDelete = (id: number) => {
-    setEducationData((prev: educationFormTypes[]) =>
-      prev.filter((edu) => {
-        return edu._id !== id;
-      })
-    );
+  const onDelete = (id: string) => {
     const body = {
       resumeId: currentStep.resumeId,
       elementId: id,
@@ -187,18 +196,28 @@ export default function EducationForm() {
     };
     httpService
       .post(`resume/editOrDeleteUserResume`, body)
-      .then((res: any) => {
-        toast.success(res?.data?.message);
-        const previewData = getDesiredDataFromPreview(
-          res.data?.data?.steps,
-          currentStep.sectionID
-        );
-        dispatch(
-          updateFormData({
-            key: "education",
-            value: previewData,
+      .then(() => {
+        httpService
+          .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+          .then((res: any) => {
+            const previewData = getDesiredDataFromPreview(
+              res.data?.data?.previewData?.steps,
+              currentStep?.sectionID
+            );
+            dispatch(
+              updateFormData({
+                key: "education",
+                value: previewData,
+              })
+            );
+            toast.success(res?.data?.message);
+            setEducationData((prev: extendedEducationTypes[]) =>
+              prev.filter((edu) => {
+                return edu._id !== id;
+              })
+            );
           })
-        );
+          .catch((err: any) => toast.error(err?.response));
       })
       .catch((err) => {
         toast.error(err?.error);
@@ -373,8 +392,9 @@ export default function EducationForm() {
           {summaries.length >= 1 ? (
             <div className="flex flex-col gap-2">
               <div className="flex gap-2 items-center">
-                {performances.map((performance) => (
+                {performances.map((performance, index: number) => (
                   <div
+                    key={index}
                     className="px-2 py-1 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-all duration-300 ease-in-out"
                     onClick={() => onClickPerformance(performance)}
                   >
@@ -405,7 +425,7 @@ export default function EducationForm() {
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">
           {educationData?.map(
-            (education: educationFormTypes, index: number) => (
+            (education: extendedEducationTypes, index: number) => (
               <div
                 key={index}
                 className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 px-4 py-4 rounded-lg transition-all duration-300 ease-in-out"
