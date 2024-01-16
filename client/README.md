@@ -10,16 +10,10 @@ After downloading the repo, you have some prerequisites to install. Then you can
 
 After successfully installing those dependencies, open this template with any IDE [[VS Code](https://code.visualstudio.com/) recommended], and then open the internal terminal of IDM [vs code shortcut <code>ctrl/cmd+\`</code>]
 
-- 👉 Install dependencies for both server and client folder by navigating to that folder
+- 👉 Install dependencies for client folder by navigating to that folder
 
 ```
 npm install
-```
-
-- 👉 Run locally - Server
-
-```
-npm run start:dev
 ```
 
 - 👉 Run locally - Client
