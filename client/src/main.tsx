@@ -3,7 +3,6 @@ import App from "./App.tsx";
 import "./index.css";
 import { store } from "./store/store.ts";
 import { Provider } from "react-redux";
-import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
