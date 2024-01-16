@@ -1,4 +1,4 @@
-import { Button, Checkbox, Label, Select, TextInput } from "flowbite-react";
+import { Button, Checkbox, Label } from "flowbite-react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../shared/RichTextEditor";
 import { useEffect, useState } from "react";
@@ -57,7 +57,6 @@ export default function ExperienceForm() {
   const [selectedDesignation, setSelectedDesignation] = useState(
     {} as designationTypes
   );
-  const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
   const [nextStepInfo, setNextStepInfo] = useState({} as nextStepTypes);
   const dispatch = useDispatch();
@@ -233,7 +232,6 @@ export default function ExperienceForm() {
 
   const onSummaryClick = (summary: summaryTypes) => {
     setTextAreaData(summary.summary);
-    setClickedSummary(summary);
   };
 
   const onContinue = () => {

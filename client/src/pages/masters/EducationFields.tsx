@@ -9,7 +9,6 @@ import { useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
-import { BsDatabaseExclamation } from "react-icons/bs";
 import EmptyState from "../../components/shared/EmptyState";
 
 interface summaryTypes {

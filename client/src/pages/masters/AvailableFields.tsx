@@ -8,7 +8,6 @@ import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
-import { BsDatabaseExclamation } from "react-icons/bs";
 import EmptyState from "../../components/shared/EmptyState";
 
 type summarytypes = {

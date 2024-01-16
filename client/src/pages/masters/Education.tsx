@@ -25,13 +25,6 @@ export default function Education() {
   const [openedId, setOpenedId] = useState("");
   const [educations, setEducations] = useState([]);
   const [textAreaData, setTextAreaData] = useState("");
-  const [activeEducation, setActiveEducation] = useState<educationTypes>({
-    _id: "",
-    summary: "",
-    degreeType: "",
-    score: "",
-    scoreLabel: "",
-  });
 
   type Inputs = {
     degree: string;
@@ -44,8 +37,6 @@ export default function Education() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
-    setValue,
   } = useForm<Inputs>();
 
   const getEducations = () => {

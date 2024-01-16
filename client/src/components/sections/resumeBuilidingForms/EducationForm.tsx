@@ -74,7 +74,6 @@ export default function EducationForm() {
     {} as educationtypes
   );
   const [nextStepInfo, setNextStepInfo] = useState({} as nextStepTypes);
-  const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const [isCurrentlyWorking, setIsCurrentlyWorking] = useState(false);
   const dispatch = useDispatch();
   const currentStep = useSelector((state: RootState) => state.currentStep);
@@ -247,7 +246,6 @@ export default function EducationForm() {
 
   const onSummaryClick = (summary: summaryTypes) => {
     setTextAreaData(summary.summary);
-    setClickedSummary(summary);
   };
 
   const onContinue = () => {

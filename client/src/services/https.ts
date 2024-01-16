@@ -1,4 +1,4 @@
-import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 // Create an instance of axios with default configurations
 const http = axios.create({

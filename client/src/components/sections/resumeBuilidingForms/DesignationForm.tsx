@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { httpService } from "../../../services/https";
-import { Button, Label, Select } from "flowbite-react";
+import { Button, Label } from "flowbite-react";
 import RichTextEditor from "../../shared/RichTextEditor";
-import { BsDatabaseExclamation } from "react-icons/bs";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
@@ -40,7 +39,6 @@ export default function DesignationForm() {
   );
   const [summaries, setSummaries] = useState([] as summaryTypes[]);
   const [textAreaData, setTextAreaData] = useState(initialSummary);
-  const [clickedSummary, setClickedSummary] = useState({} as summaryTypes);
   const dispatch = useDispatch();
 
   const currentStep = useSelector((state: RootState) => state.currentStep);
@@ -102,7 +100,6 @@ export default function DesignationForm() {
 
   const onSummaryClick = (summary: summaryTypes) => {
     setTextAreaData(summary.summary);
-    setClickedSummary(summary);
   };
 
   const onEdit = () => {
