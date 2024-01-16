@@ -299,10 +299,11 @@ export const userResumeService = new class {
                                                 name: 1,
                                                 degreeType: 1,
                                                 summaries: 1,
-                                                performances: 1
+                                                performances: 1,
 
                                             }
                                         },
+
                                         {
                                             $addFields: {
                                                 summaries: {
@@ -338,6 +339,7 @@ export const userResumeService = new class {
                                     ]
                                 }
                             },
+
 
                             {
                                 $lookup: {
@@ -414,6 +416,7 @@ export const userResumeService = new class {
                                     preserveNullAndEmptyArrays: true
                                 },
                             },
+
                             {
                                 $unwind: {
                                     path: '$steps.data.experienceData',
@@ -497,7 +500,18 @@ export const userResumeService = new class {
                     $group: {
                         _id: '$_id._id',
                         steps: {
-                            $push: { _id: "$_id.stepId", step: '$_id.step', data: '$data' }
+                            $push: {
+                                _id: "$_id.stepId", step: '$_id.step', data: {
+                                    $filter: {
+                                        input: '$data', as: 'item', cond: {
+                                            $or: [
+                                                { $eq: [{ $type: "$$item" }, "string"] },
+                                                { $eq: [{ $ifNull: ["$$item.is_active", true] }, true] }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
                         },
                         __v: { $first: '$__v' }
                     }
