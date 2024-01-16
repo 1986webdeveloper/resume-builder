@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Card from "../../components/shared/Card";
 import { useParams } from "react-router-dom";
 import AddModal from "../../components/sections/AddModal";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
@@ -10,6 +10,8 @@ import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { BsDatabaseExclamation } from "react-icons/bs";
+import EmptyState from "../../components/shared/EmptyState";
+import CustomSelect from "../../components/shared/CustomSelect";
 
 export default function Designations() {
   interface designationType {
@@ -144,43 +146,28 @@ export default function Designations() {
               ))}
             </div>
           ) : (
-            <div className="w-full min-h-[650px] flex justify-center items-center">
-              <div className="flex flex-col gap-2 items-center justify-center">
-                <BsDatabaseExclamation color="gray" size={60} />
-                <p className="text-sm text-center ml-2 text-gray-400">
-                  No Designations to show.
-                </p>
-              </div>
-            </div>
+            <EmptyState description="No Summaries to show." />
           )}
         </div>
       )}
 
       {isOpen && modalType === "add" && (
-        <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
+        <form className="max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
           <AddModal handleModalClose={closeModal} modalTitle="Add Designation">
             <div>
               <div className="flex flex-col gap-4">
-                <div>
-                  <select
-                    id="designation"
-                    className=" border cursor-pointer rounded-md w-52 duration-300 p-4 bg-indigo-50"
-                    {...register("designation", { required: true })}
-                  >
-                    <option value="" disabled className="bg-indigo-50">
-                      Select Option
-                    </option>
-                    {allowedDesignations.map((designationName, index) => (
-                      <option
-                        key={index}
-                        value={designationName}
-                        className="capitalize bg-indigo-50"
-                      >
-                        {designationName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Select Designation"
+                  isRequired={true}
+                  id="designation"
+                  register={register}
+                  errors={errors}
+                  defaultValue=""
+                  initialOption="Select Designation"
+                  optionsData={allowedDesignations}
+                  optionsKey=""
+                  disabled={false}
+                />
                 <div className="max-w-md">
                   <RichTextEditor setTextAreaData={setTextAreaData} />
                 </div>

@@ -41,7 +41,6 @@ export const formDataSlice = createSlice({
         // Update the specific state property based on the key
         (state as any)[key] = value;
       }
-      localStorage.setItem("formData", JSON.stringify(state));
     },
     setFormData: (state, action: PayloadAction<PayloadType[]>) => {
       // Initialize all keys with empty values
@@ -56,7 +55,6 @@ export const formDataSlice = createSlice({
           (state as any)[key] = value;
         }
       });
-      localStorage.setItem("formData", JSON.stringify(state));
     },
     clearFormData: (state) => {
       state.personal = [];
@@ -64,7 +62,6 @@ export const formDataSlice = createSlice({
       state.experience = [];
       state.education = [];
       state.skills = [];
-      localStorage.removeItem("formData");
     },
   },
 });

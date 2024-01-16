@@ -26,14 +26,14 @@ export default function ResumeCard({
   onDelete,
 }: ComponentTypes) {
   return (
-    <div className="px-4 py-4 relative shadow-xl border border-gray-400 rounded-lg cursor-pointer w-full">
+    <div className="px-4 py-4 relative shadow-xl border border-gray-400 dark:bg-gray-800 rounded-lg cursor-pointer w-full transition-all duration-300 ease-in-out hover:bg-gray-50 hover:shadow-2xl hover:scale-105">
       <span
         className="cursor-pointer text-remove absolute right-2 top-2"
         onClick={onDelete}
       >
         <MdDelete size={18} />
       </span>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 dark:text-gray-100">
         <div className="flex gap-6 items-center w-full">
           <span>
             <FaUserAlt size={60} color="gray" />
@@ -64,7 +64,7 @@ export default function ResumeCard({
         </div>
         <Button
           outline
-          className=" bg-primary"
+          className="bg-primary"
           color="dark"
           onClick={onContinue}
         >

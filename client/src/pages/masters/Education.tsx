@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import Header from "../../components/shared/Header";
 import EducationCard from "../../components/shared/EducationCard";
 import AddModal from "../../components/sections/AddModal";
-import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
 import RichTextEditor from "../../components/shared/RichTextEditor";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { httpService } from "../../services/https";
 import Modal from "../../components/sections/DeleteModal";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
-import { BsDatabaseExclamation } from "react-icons/bs";
+import EmptyState from "../../components/shared/EmptyState";
+import CustomInput from "../../components/shared/CustomInput";
 
 interface educationTypes {
   _id: string;
@@ -71,7 +71,6 @@ export default function Education() {
   };
 
   const onAdd: SubmitHandler<Inputs> = (data) => {
-    console.log(data, textAreaData);
     const body = {
       degreeType: data.degree,
       summary: textAreaData,
@@ -129,73 +128,43 @@ export default function Education() {
             ))}
           </div>
         ) : (
-          <div className="w-full min-h-[650px] flex justify-center items-center">
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <BsDatabaseExclamation color="gray" size={60} />
-              <p className="text-sm text-center ml-2 text-gray-400">
-                No Educations to show.
-              </p>
-            </div>
-          </div>
+          <EmptyState description="No Educations to show." />
         )}
       </div>
 
       {isOpen && modalType === "add" && (
         <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
           <AddModal handleModalClose={closeModal} modalTitle="Add Education">
-            <div>
-              <div className="max-w-md">
-                <Input
-                  register={register}
-                  type="text"
-                  placeholder="Degree Name"
-                  isRequired={true}
-                  id="degree"
-                  color={errors?.degree ? "border-red-500" : ""}
-                  errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-                />
-                {errors?.degree?.type && (
-                  <p className="text-red-600 mt-1 text-xs">
-                    {errors?.degree?.message}
-                  </p>
-                )}
-              </div>
+            <div className="flex flex-col gap-3">
+              <CustomInput
+                type="text"
+                isRequired={true}
+                id="degree"
+                placeholder="Degree Name"
+                register={register}
+                errors={errors}
+                errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+              />
               <div className="max-w-md">
                 <div className="flex gap-3">
-                  <div>
-                    <Input
-                      register={register}
-                      type="number"
-                      placeholder="Score"
-                      isRequired={true}
-                      id="score"
-                      color={errors?.score ? "border-red-500" : ""}
-                      errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-                      customClass="mt-3 mb-3"
-                    />
-                    {errors?.score?.type && (
-                      <p className="text-red-600 mt-1 text-xs">
-                        {errors?.score?.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Input
-                      register={register}
-                      type="text"
-                      placeholder="Score Label. Ex - CGPA"
-                      isRequired={true}
-                      id="scoreLabel"
-                      color={errors?.scoreLabel ? "border-red-500" : ""}
-                      errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-                      customClass="mt-3 mb-3"
-                    />
-                    {errors?.scoreLabel?.type && (
-                      <p className="text-red-600 mt-1 text-xs">
-                        {errors?.scoreLabel?.message}
-                      </p>
-                    )}
-                  </div>
+                  <CustomInput
+                    type="number"
+                    isRequired={true}
+                    id="score"
+                    placeholder="Score"
+                    register={register}
+                    errors={errors}
+                    errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+                  />
+                  <CustomInput
+                    type="text"
+                    isRequired={true}
+                    id="scoreLabel"
+                    placeholder="Score Label. Ex - CGPA"
+                    register={register}
+                    errors={errors}
+                    errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+                  />
                 </div>
               </div>
               <div className="max-w-md">

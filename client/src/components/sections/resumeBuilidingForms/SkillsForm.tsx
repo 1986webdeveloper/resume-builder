@@ -3,7 +3,7 @@ import { FaSearch } from "react-icons/fa";
 import { httpService } from "../../../services/https";
 import { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
@@ -135,7 +135,7 @@ export default function SkillsForm() {
           <div className="w-full flex justify-center items-center">
             <div className="flex shadow-lg">
               <input
-                className="rounded-l-lg bg-gray-50   focus:border-none focus:outline-none"
+                className="rounded-l-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-100 border focus:border-none"
                 type="text"
                 value={serachStr}
                 onChange={(e) => onSearch(e.target.value)}
@@ -153,7 +153,7 @@ export default function SkillsForm() {
               {skills?.map((skill, index) => (
                 <div
                   key={index}
-                  className="bg-gray-200 px-4 py-2 rounded-lg capitalize cursor-pointer"
+                  className=" transition-all duration-300 ease-in-out bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700  px-4 py-2 rounded-lg capitalize cursor-pointer"
                   onClick={() => onAdd(skill)}
                 >
                   {skill}
@@ -162,7 +162,12 @@ export default function SkillsForm() {
             </div>
           </div>
           <div className="mt-auto self-center">
-            <Button color="success" className="px-9" onClick={onContinue}>
+            <Button
+              color="success"
+              className="px-9"
+              onClick={onContinue}
+              disabled={addedSkills.length > 0 ? false : true}
+            >
               Continue
             </Button>
           </div>
@@ -172,7 +177,7 @@ export default function SkillsForm() {
             {addedSkills?.map((skill: string, index: number) => (
               <div
                 key={index}
-                className="bg-green-100 shadow-md px-4 py-2 rounded-lg flex justify-between items-center"
+                className="bg-green-100 dark:bg-green-800 dark:text-gray-100 shadow-md px-4 py-2 rounded-lg flex justify-between items-center"
               >
                 <span className="capitalize">{skill}</span>
                 <span

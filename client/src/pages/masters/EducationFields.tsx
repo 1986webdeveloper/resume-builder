@@ -6,10 +6,11 @@ import AddModal from "../../components/sections/AddModal";
 import RichTextEditor from "../../components/shared/RichTextEditor";
 import Modal from "../../components/sections/DeleteModal";
 import { useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
 import { BsDatabaseExclamation } from "react-icons/bs";
+import EmptyState from "../../components/shared/EmptyState";
 
 interface summaryTypes {
   summary: string;
@@ -67,7 +68,6 @@ export default function EducationFields() {
         }
       })
       .catch((err) => {
-        console.log(err, "error");
         toast.error(err.response);
       });
   };
@@ -94,7 +94,6 @@ export default function EducationFields() {
   };
 
   const onDelete = () => {
-    console.log("delete");
     const body = {
       educationId: id,
       summaryId: activeSummary.id,
@@ -121,7 +120,7 @@ export default function EducationFields() {
         description="Add or Edit available Education Summaries"
       />
       <CustomBreadcrumb />
-      <div className="mt-5 px-8 py-5 h-full shadow-lg border rounded-lg max-h-[700px] overflow-auto">
+      <div className="mt-5 px-8 py-5 h-[650px] shadow-lg border rounded-lg max-h-[700px] overflow-auto">
         {allSummaries.length >= 1 ? (
           <div className="flex flex-col gap-3">
             {allSummaries.map((summary: summaryTypes, index) => (
@@ -135,14 +134,7 @@ export default function EducationFields() {
             ))}
           </div>
         ) : (
-          <div className="w-full min-h-[650px] flex justify-center items-center">
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <BsDatabaseExclamation color="gray" size={60} />
-              <p className="text-sm text-center ml-2 text-gray-400">
-                No Summaries to show.
-              </p>
-            </div>
-          </div>
+          <EmptyState description="No Summaries to show." />
         )}
       </div>
 

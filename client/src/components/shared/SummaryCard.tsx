@@ -20,7 +20,7 @@ export default function SummaryCard({
     <div>
       <div
         key={id}
-        className="bg-indigo-50 p-5 rounded-xl flex items-center justify-between"
+        className="bg-indigo-50 dark:bg-gray-800 dark:text-gray-100 p-5 rounded-xl flex items-center justify-between"
       >
         <p
           className="capitalize"

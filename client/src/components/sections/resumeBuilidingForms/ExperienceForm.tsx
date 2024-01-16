@@ -6,13 +6,17 @@ import { FaPlusCircle } from "react-icons/fa";
 import { BsDatabaseExclamation } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { httpService } from "../../../services/https";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentStep } from "../../../store/slices/currentStepSlice";
 import { RootState } from "../../../store/store";
 import { experienceFormTypes } from "../../../types/formTypes";
 import { updateFormData } from "../../../store/slices/formDataSlice";
 import { getDesiredDataFromPreview } from "../../../services/helper";
+import CustomDate from "../../shared/CustomDate";
+import CustomInput from "../../shared/CustomInput";
+import CustomSelect from "../../shared/CustomSelect";
+import EmptyState from "../../shared/EmptyState";
 
 interface summaryTypes {
   _id: string;
@@ -58,7 +62,7 @@ export default function ExperienceForm() {
     watch,
     formState: { errors },
   } = useForm<experienceFormTypes | any>();
-  console.log(experienceData, "expdata", formData);
+
   const getAllowedDesignations = () => {
     httpService.get(`admin/getDesignationOrSummaryList`).then((res: any) => {
       if (res.status === 200) {
@@ -140,18 +144,23 @@ export default function ExperienceForm() {
         };
         httpService
           .post(`resume/editOrDeleteUserResume`, body)
-          .then((res: any) => {
-            toast.success(res?.data?.message);
-            const previewData = getDesiredDataFromPreview(
-              res.data?.data?.steps,
-              currentStep.sectionID
-            );
-            dispatch(
-              updateFormData({
-                key: "experience",
-                value: previewData,
+          .then(() => {
+            httpService
+              .get(`resume/resumeInfo?resumeId=${currentStep?.resumeId}`)
+              .then((res: any) => {
+                const previewData = getDesiredDataFromPreview(
+                  res.data?.data?.previewData?.steps,
+                  currentStep?.sectionID
+                );
+                dispatch(
+                  updateFormData({
+                    key: "experience",
+                    value: previewData,
+                  })
+                );
+                toast.success(res?.data?.message);
               })
-            );
+              .catch((err: any) => toast.error(err?.response));
           })
           .catch((err) => {
             toast.error(err?.message);
@@ -162,7 +171,6 @@ export default function ExperienceForm() {
   };
 
   const onEdit = (data: experienceFormTypes, id: number) => {
-    console.log(data, "data");
     setOnEditDataId(id);
     setValue("companyName", data.companyName);
     setValue("from", data.from);
@@ -255,51 +263,24 @@ export default function ExperienceForm() {
           className="min-w-[25%] max-w-[26%] h-[500px] overflow-y-scroll shadow-xl px-6 py-8 rounded-lg border self-center flex flex-col gap-2"
           onSubmit={handleSubmit(onAdd)}
         >
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="companyName" value="Company Name" />
-            </div>
-            <TextInput
-              {...register("companyName", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-              })}
-              id="companyName"
-              type="text"
-              color={errors?.companyName ? "failure" : ""}
-            />
-            {errors?.companyName && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors?.companyName?.message as string}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="from" value="From" />
-            </div>
-            <input
-              type="date"
-              {...register("from", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-              })}
-              className="rounded-lg w-full"
-            />
-            {errors.from?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.from?.message as string}
-              </p>
-            )}
-          </div>
+          <CustomInput
+            type="text"
+            label="Company Name"
+            isRequired={true}
+            id="companyName"
+            register={register}
+            errors={errors}
+            errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            errMsg="There should be no empty spaces."
+          />
+          <CustomDate
+            label="From"
+            isRequired={true}
+            id="from"
+            register={register}
+            errors={errors}
+            disabled={false}
+          />
           <div className="flex items-center gap-2">
             <Checkbox
               id="present"
@@ -308,51 +289,26 @@ export default function ExperienceForm() {
             />
             <Label htmlFor="present">Currently Working ?</Label>
           </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="to" value="To" />
-            </div>
-            <input
-              type="date"
-              {...register("to")}
-              className={`rounded-lg w-full ${
-                isCurrentlyWorking ? "border-gray-400 text-gray-400" : ""
-              }`}
-              disabled={isCurrentlyWorking}
-            />
-            {errors.to?.type && (
-              <p className="text-red-600 mt-1 text-xs">
-                {errors.to?.message as string}
-              </p>
-            )}
-          </div>
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="designation" value="Select your designation" />
-            </div>
-            <Select
-              id="designation"
-              defaultValue=""
-              {...register("designation", {
-                required: {
-                  value: true,
-                  message: "This field is required",
-                },
-                pattern: {
-                  value: /^[^\s]+(?:$|.*[^\s]+$)/,
-                  message: "There should be no empty spaces.",
-                },
-              })}
-              color={errors?.designation ? "failure" : ""}
-            >
-              <option value="" disabled>
-                Select Designation
-              </option>
-              {allowedDesignations.map((designation, index) => (
-                <option key={index}>{designation.name}</option>
-              ))}
-            </Select>
-          </div>
+          <CustomDate
+            label="To"
+            isRequired={true}
+            id="to"
+            register={register}
+            errors={errors}
+            disabled={isCurrentlyWorking}
+          />
+          <CustomSelect
+            label="Select your designation"
+            isRequired={true}
+            id="designation"
+            register={register}
+            errors={errors}
+            defaultValue=""
+            initialOption="Select Designation"
+            optionsData={allowedDesignations}
+            optionsKey="name"
+            disabled={false}
+          />
           <div className="mt-3">
             <div className="mb-2 block">
               <Label value="Summary" />
@@ -360,15 +316,20 @@ export default function ExperienceForm() {
             <RichTextEditor
               setTextAreaData={setTextAreaData}
               defaultData={textAreaData}
+              isError={textAreaData.length ? false : true}
             />
           </div>
-          <Button className="mt-2" type="submit">
+          <Button outline className=" bg-primary" color="dark" type="submit">
             <span className="mr-2">
               <FaPlusCircle />
             </span>
             Add
           </Button>
-          <Button color="success" onClick={onContinue}>
+          <Button
+            color="success"
+            onClick={onContinue}
+            disabled={experienceData.length ? false : true}
+          >
             Continue
           </Button>
         </form>
@@ -378,7 +339,7 @@ export default function ExperienceForm() {
               {summaries.map((summary) => (
                 <div
                   key={summary._id}
-                  className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer hover:bg-gray-100"
+                  className="shadow-lg border px-2 py-4 rounded-xl cursor-pointer dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
                   onClick={() => onSummaryClick(summary)}
                 >
                   <div
@@ -391,21 +352,14 @@ export default function ExperienceForm() {
               ))}
             </div>
           ) : (
-            <div className="w-full h-full flex justify-center items-center">
-              <div className="flex flex-col gap-2 items-center">
-                <BsDatabaseExclamation color="gray" size={60} />
-                <p className="text-sm text-center ml-2 text-gray-400">
-                  No Summaries to show.
-                </p>
-              </div>
-            </div>
+            <EmptyState description="No Summaries to show." />
           )}
         </div>
         <div className="min-w-[20%] max-w-[21%] min-h-[200px] max-h-[500px] overflow-y-auto flex flex-col gap-3">
           {experienceData.map((exp: any, index: number) => (
             <div
               key={index}
-              className="flex flex-col gap-2 bg-gray-100 px-4 py-4 rounded-lg"
+              className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 px-4 py-4 rounded-lg transition-all duration-300 ease-in-out"
             >
               <div className="flex items-center justify-between cursor-pointer">
                 <p

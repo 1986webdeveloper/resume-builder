@@ -1,14 +1,14 @@
 import SummaryCard from "../../components/shared/SummaryCard";
 import { useEffect, useState } from "react";
 import AddModal from "../../components/sections/AddModal";
-import Input from "../../components/shared/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Modal from "../../components/sections/DeleteModal";
 import Header from "../../components/shared/Header";
 import { httpService } from "../../services/https";
 import CustomBreadcrumb from "../../components/shared/CustomBreadcrumb";
-import { BsDatabaseExclamation } from "react-icons/bs";
+import EmptyState from "../../components/shared/EmptyState";
+import CustomInput from "../../components/shared/CustomInput";
 
 interface skillTypes {
   name: string;
@@ -60,7 +60,6 @@ export default function Skills() {
     httpService
       .post(`skills/addSkills`, { name: data.skill })
       .then((res: any) => {
-        console.log(res);
         if (res.status === 201) {
           getAllSkills();
           toast.success(res.data?.message);
@@ -122,7 +121,7 @@ export default function Skills() {
         description="Add or Edit available Skills"
       />
       <CustomBreadcrumb />
-      <div className="mt-5 px-10 py-5 h-full shadow-lg border rounded-lg max-h-[700px] overflow-auto">
+      <div className="mt-5 px-10 py-5 h-[650px] shadow-lg border rounded-lg max-h-[700px] overflow-auto">
         {allSkills.length >= 1 ? (
           <div className="grid lg:grid-cols-6 md:grid-cols-5 grid-cols-4 gap-6 ">
             {allSkills.map((skill: skillTypes, index: number) => (
@@ -136,38 +135,22 @@ export default function Skills() {
             ))}
           </div>
         ) : (
-          <div className="w-full min-h-[650px] flex justify-center items-center">
-            <div className="flex flex-col gap-2 items-center justify-center">
-              <BsDatabaseExclamation color="gray" size={60} />
-              <p className="text-sm text-center ml-2 text-gray-400">
-                No Skills to show.
-              </p>
-            </div>
-          </div>
+          <EmptyState description="No Skills to show." />
         )}
       </div>
 
       {isOpen && modalType === "add" && (
         <form className="mx-auto max-w-xs mt-3" onSubmit={handleSubmit(onAdd)}>
           <AddModal handleModalClose={closeModal} modalTitle="Add Skill">
-            <div>
-              <div className="max-w-md">
-                <Input
-                  register={register}
-                  type="text"
-                  placeholder="Skill"
-                  isRequired={true}
-                  id="skill"
-                  color={errors.skill ? "border-red-500" : ""}
-                  errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
-                />
-                {errors.skill?.type && (
-                  <p className="text-red-600 mt-1 text-xs">
-                    {errors.skill?.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            <CustomInput
+              type="text"
+              isRequired={true}
+              id="skill"
+              placeholder="Skill"
+              register={register}
+              errors={errors}
+              errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
+            />
           </AddModal>
         </form>
       )}
@@ -177,20 +160,15 @@ export default function Skills() {
           <AddModal handleModalClose={closeModal} modalTitle="Edit Skill">
             <div>
               <div className="max-w-md">
-                <Input
-                  register={register}
+                <CustomInput
                   type="text"
-                  placeholder="Skill"
                   isRequired={true}
                   id="skill"
-                  color={errors.skill ? "border-red-500" : ""}
+                  placeholder="Skill"
+                  register={register}
+                  errors={errors}
                   errorPattern={/^[^\s]+(?:$|.*[^\s]+$)/}
                 />
-                {errors.skill?.type && (
-                  <p className="text-red-600 mt-1 text-xs">
-                    {errors.skill?.message}
-                  </p>
-                )}
               </div>
             </div>
           </AddModal>
