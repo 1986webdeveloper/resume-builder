@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    p,
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-size: 1rem;
+    }
+
+    .container {
+      max-width: 100%;
+      min-width: 300px;
+      min-height: 100%;
+      font-size: 1rem;
+    }
+
+    .wrraper {
+      display: flex;
+      overflow: hidden;
+      padding: 1rem 2rem;
+      flex-direction: column;
+      gap: 0.1rem;
+      height: 100%;
+      background-color: #ffffff;
+    }
+
+    .wrraper .title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .wrraper .role {
+      margin: 1rem 0px;
+      text-transform: capitalize;
+    }
+
+    .contact-details {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      display: flex;
+      width: 100%;
+      gap: 0.5rem;
+    }
+
+    .contact-details p {
+      color: #4b5563;
+    }
+
+    .sub-title {
+      margin-bottom: 10px;
+      margin-top: 1rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .summary {
+      color: #374151;
+      margin-bottom: 10px;
+    }
+
+    ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+
+    ul li {
+      margin-left: 1rem;
+      text-transform: capitalize;
+    }
+
+    .skill-content {
+      width: 50%;
+    }
+
+    .skills-list {
+      column-count: 2;
+      column-width: auto;
+    }
+
+    .skills-list li {
+      margin-bottom: 5px;
+    }
+
+    .experience-wrap {
+      margin-bottom: 0.3rem;
+    }
+
+    .experience-wrap h3 {
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .sub-summary {
+      color: #374151;
+    }
+
+    .timeline {
+      margin-top: 10px;
+      color: #4b5563;
+    }
+
+    .experience-timeline span {
+      font-weight: 700;
+    }
+
+    .education-wrap {
+      margin-bottom: 0.3rem;
+    }
+
+    .education-wrap h3 {
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .performance {
+      margin-bottom: 10px;
+    }
+
+    .links {
+      color: #3b82f6;
+    }
+
+    .links :hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="wrraper">
+
+      {{!-- Personal information --}}
+      <div class="section">
+        {{#each content.personal}}
+        <h1 class="title">{{this.full_name}}</h1>
+        <div class="contact-details">
+          <p>{{this.address}},{{this.states.name}},{{this.countries.name}}</p>
+          <p>{{this.mobileNo}},</p>
+          <p>{{this.email}},</p>
+          <p>{{this.linkedIn}}</p>
+          <p>{{this.github}}</p>
+        </div>
+        {{/each}}
+        <h2 class="role">{{content.designation.[0].designationData.name}}</h2>
+        <hr />
+      </div>
+
+      {{!-- About Me section --}}
+      <div class="section">
+        <h2 class="sub-title">Summary</h2>
+        <div class="summary">
+          {{#if content.designation.[0].designationData.summaries}}
+          {{{content.designation.[0].designationData.summaries.summary}}}
+          {{else}}
+          {{{content.designation.[0].customSummary}}}
+          {{/if}}
+        </div>
+        <hr />
+      </div>
+
+      {{!-- Skills section --}}
+      <div class="section">
+        <div class="skill-content">
+          <h2 class="sub-title">Skills</h2>
+          <ul class="skills-list">
+            {{#each content.skills}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        <hr />
+      </div>
+
+      {{!-- Experience section --}}
+      <div class="section">
+        <h2 class="sub-title">Experience</h2>
+        {{#each content.experience}}
+        <div class="experience-wrap">
+          <h3>{{this.companyName}}</h3>
+          <p class="sub-summary">
+            {{#if this.experienceData.summaries}}
+            {{{this.experienceData.summaries.summary}}}
+            {{else}}
+            {{{this.customSummary}}}
+            {{/if}}
+          </p>
+          <p class="timeline">
+            <span class="font-bold">From:</span> {{this.from}}
+            {{#if this.present}}
+            <span class="font-bold">To:</span> Present
+            {{else}}
+            <span class="font-bold">To:</span> {{this.to}}
+            {{/if}}
+          </p>
+        </div>
+        {{/each}}
+        <hr />
+      </div>
+
+      {{!-- Education section --}}
+      <div class="section">
+        <h2 class="sub-title">Education</h2>
+        {{#each content.education}}
+        <div class="education-wrap">
+          <h3>{{this.instituteName}}</h3>
+          {{#if this.educationData}}
+          {{#if this.educationData.performances}}
+          <span class="performance"> {{this.educationData.performances.label}} :
+            {{this.educationData.performances.value}}</span>
+          {{else}}
+          <span class="performance"> {{this.customPerformance.label}} : {{this.customPerformance.value}}</span>
+          {{/if}}
+          {{else}}
+          <span class="performance"> {{this.customPerformance.label}} : {{this.customPerformance.value}}</span>
+          {{/if}}
+          <p class="sub-summary">
+            {{#if this.educationData.summaries}}
+            {{{this.educationData.summaries.summary}}}
+            {{else}}
+            {{{this.customSummary}}}
+            {{/if}}
+          </p>
+          <p class="timeline">
+            <span class="font-bold">From:</span> {{this.from}}
+            {{#if this.present}}
+            <span class="font-bold">To:</span> Present
+            {{else}}
+            <span class="font-bold">To:</span> {{this.to}}
+            {{/if}}
+          </p>
+        </div>
+        {{/each}}
+        <hr />
+      </div>
+
+    </div>
+</body>
+
+</html>
